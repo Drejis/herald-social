@@ -7,15 +7,30 @@ import {
   Settings,
   Sparkles,
   TrendingUp,
+  LayoutDashboard,
+  Wallet,
+  LogOut,
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
+import { useAuth } from '@/hooks/useAuth';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 export function AppSidebar() {
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/auth');
+  };
+
   const navItems = [
-    { icon: Home, label: 'Feed', path: '/' },
+    { icon: Home, label: 'Feed', path: '/feed' },
     { icon: Search, label: 'Explore', path: '/explore' },
+    { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
+    { icon: Wallet, label: 'Wallet', path: '/wallet' },
     { icon: Bell, label: 'Notifications', path: '/notifications' },
-    { icon: MessageSquare, label: 'Messages', path: '/messages' },
     { icon: TrendingUp, label: 'Leaderboard', path: '/leaderboard' },
     { icon: User, label: 'Profile', path: '/profile' },
   ];
@@ -53,7 +68,7 @@ export function AppSidebar() {
       </nav>
 
       {/* Bottom section */}
-      <div className="p-3 border-t border-sidebar-border">
+      <div className="p-3 border-t border-sidebar-border space-y-1">
         <NavLink
           to="/settings"
           className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
@@ -62,6 +77,16 @@ export function AppSidebar() {
           <Settings className="w-5 h-5" />
           <span>Settings</span>
         </NavLink>
+        {user && (
+          <Button
+            variant="ghost"
+            className="w-full justify-start gap-3 px-4 py-3 text-muted-foreground hover:text-destructive"
+            onClick={handleSignOut}
+          >
+            <LogOut className="w-5 h-5" />
+            <span>Sign Out</span>
+          </Button>
+        )}
       </div>
     </aside>
   );
