@@ -2,7 +2,6 @@ import {
   Home,
   Search,
   Bell,
-  MessageSquare,
   User,
   Settings,
   Sparkles,
@@ -10,6 +9,8 @@ import {
   LayoutDashboard,
   Wallet,
   LogOut,
+  Trophy,
+  Megaphone,
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/hooks/useAuth';
@@ -31,7 +32,8 @@ export function AppSidebar() {
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
     { icon: Wallet, label: 'Wallet', path: '/wallet' },
     { icon: Bell, label: 'Notifications', path: '/notifications' },
-    { icon: TrendingUp, label: 'Leaderboard', path: '/leaderboard' },
+    { icon: Trophy, label: 'Leaderboard', path: '/leaderboard' },
+    { icon: Megaphone, label: 'Ads', path: '/ads' },
     { icon: User, label: 'Profile', path: '/profile' },
   ];
 

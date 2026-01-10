@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      ad_campaigns: {
+        Row: {
+          budget_points: number
+          clicks: number
+          created_at: string
+          description: string | null
+          end_date: string | null
+          id: string
+          impressions: number
+          spent_points: number
+          start_date: string | null
+          status: string
+          target_audience: Json | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          budget_points?: number
+          clicks?: number
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          impressions?: number
+          spent_points?: number
+          start_date?: string | null
+          status?: string
+          target_audience?: Json | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          budget_points?: number
+          clicks?: number
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          impressions?: number
+          spent_points?: number
+          start_date?: string | null
+          status?: string
+          target_audience?: Json | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       earnings_history: {
         Row: {
           amount: number
@@ -35,6 +86,27 @@ export type Database = {
           id?: string
           source?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      followers: {
+        Row: {
+          created_at: string
+          follower_id: string
+          following_id: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          follower_id: string
+          following_id: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          follower_id?: string
+          following_id?: string
+          id?: string
         }
         Relationships: []
       }
@@ -118,36 +190,78 @@ export type Database = {
           bio: string | null
           created_at: string
           display_name: string | null
+          followers_count: number | null
+          following_count: number | null
           id: string
+          is_verified: boolean | null
           reputation: number | null
           tier: string | null
+          total_engagement: number | null
           updated_at: string
           user_id: string
           username: string | null
+          verification_points_threshold: number | null
         }
         Insert: {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
           display_name?: string | null
+          followers_count?: number | null
+          following_count?: number | null
           id?: string
+          is_verified?: boolean | null
           reputation?: number | null
           tier?: string | null
+          total_engagement?: number | null
           updated_at?: string
           user_id: string
           username?: string | null
+          verification_points_threshold?: number | null
         }
         Update: {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
           display_name?: string | null
+          followers_count?: number | null
+          following_count?: number | null
           id?: string
+          is_verified?: boolean | null
           reputation?: number | null
           tier?: string | null
+          total_engagement?: number | null
           updated_at?: string
           user_id?: string
           username?: string | null
+          verification_points_threshold?: number | null
+        }
+        Relationships: []
+      }
+      user_analytics: {
+        Row: {
+          created_at: string
+          event_data: Json | null
+          event_type: string
+          id: string
+          session_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_data?: Json | null
+          event_type: string
+          id?: string
+          session_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_data?: Json | null
+          event_type?: string
+          id?: string
+          session_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -165,6 +279,45 @@ export type Database = {
         Update: {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_settings: {
+        Row: {
+          created_at: string
+          dark_mode: boolean | null
+          email_notifications: boolean | null
+          id: string
+          language: string | null
+          notifications_enabled: boolean | null
+          privacy_level: string | null
+          push_notifications: boolean | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          dark_mode?: boolean | null
+          email_notifications?: boolean | null
+          id?: string
+          language?: string | null
+          notifications_enabled?: boolean | null
+          privacy_level?: string | null
+          push_notifications?: boolean | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          dark_mode?: boolean | null
+          email_notifications?: boolean | null
+          id?: string
+          language?: string | null
+          notifications_enabled?: boolean | null
+          privacy_level?: string | null
+          push_notifications?: boolean | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
