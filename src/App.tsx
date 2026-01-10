@@ -9,6 +9,11 @@ import Feed from "./pages/Feed";
 import Dashboard from "./pages/Dashboard";
 import Explore from "./pages/Explore";
 import Wallet from "./pages/Wallet";
+import Profile from "./pages/Profile";
+import Settings from "./pages/Settings";
+import Leaderboard from "./pages/Leaderboard";
+import Notifications from "./pages/Notifications";
+import Ads from "./pages/Ads";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +38,11 @@ const AppRoutes = () => {
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/explore" element={<ProtectedRoute><Explore /></ProtectedRoute>} />
       <Route path="/wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+      <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+      <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
+      <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+      <Route path="/ads" element={<ProtectedRoute><Ads /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
