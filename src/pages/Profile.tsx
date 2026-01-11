@@ -7,25 +7,22 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   BadgeCheck,
   Edit2,
   Sparkles,
-  Users,
   Heart,
   MessageCircle,
   Share2,
   TrendingUp,
   Calendar,
-  MapPin,
-  Link as LinkIcon,
   Save,
   X
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { AvatarUpload } from '@/components/herald/AvatarUpload';
 
 interface ProfileData {
   id: string;
@@ -129,6 +126,12 @@ export default function Profile() {
     }
   };
 
+  const handleAvatarChange = (newUrl: string) => {
+    if (profile) {
+      setProfile({ ...profile, avatar_url: newUrl });
+    }
+  };
+
   const verificationProgress = wallet
     ? Math.min((wallet.httn_points / VERIFICATION_THRESHOLD) * 100, 100)
     : 0;
@@ -156,12 +159,14 @@ export default function Profile() {
           <div className="h-32 bg-gradient-to-r from-primary/20 via-primary/10 to-transparent" />
           <CardContent className="relative pt-0 pb-6">
             <div className="flex flex-col sm:flex-row gap-4 -mt-12">
-              <Avatar className="w-24 h-24 border-4 border-background">
-                <AvatarImage src={profile?.avatar_url || ''} />
-                <AvatarFallback className="text-2xl font-display font-bold bg-secondary">
-                  {profile?.display_name?.[0] || '?'}
-                </AvatarFallback>
-              </Avatar>
+              {user && (
+                <AvatarUpload
+                  userId={user.id}
+                  currentAvatarUrl={profile?.avatar_url || null}
+                  displayName={profile?.display_name || null}
+                  onAvatarChange={handleAvatarChange}
+                />
+              )}
               
               <div className="flex-1 pt-2">
                 <div className="flex items-start justify-between">
