@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { ContentInsights } from '@/components/herald/ContentInsights';
 import { 
   LineChart, 
   Line, 
@@ -193,6 +194,9 @@ export default function Dashboard() {
             </Card>
           ))}
         </div>
+
+        {/* AI Content Insights */}
+        <ContentInsights posts={posts} engagementData={engagementData} />
 
         {/* Charts */}
         <Tabs defaultValue="engagement" className="w-full">

@@ -110,6 +110,54 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          actor_avatar: string | null
+          actor_id: string | null
+          actor_name: string | null
+          actor_verified: boolean | null
+          created_at: string
+          id: string
+          message: string
+          read: boolean | null
+          reference_id: string | null
+          reference_type: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          actor_avatar?: string | null
+          actor_id?: string | null
+          actor_name?: string | null
+          actor_verified?: boolean | null
+          created_at?: string
+          id?: string
+          message: string
+          read?: boolean | null
+          reference_id?: string | null
+          reference_type?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          actor_avatar?: string | null
+          actor_id?: string | null
+          actor_name?: string | null
+          actor_verified?: boolean | null
+          created_at?: string
+          id?: string
+          message?: string
+          read?: boolean | null
+          reference_id?: string | null
+          reference_type?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       post_interactions: {
         Row: {
           content: string | null
@@ -360,6 +408,39 @@ export type Database = {
           target?: number
           task_type?: string
           title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      wallet_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string | null
+          id: string
+          reference_id: string | null
+          token_type: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          reference_id?: string | null
+          token_type?: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          reference_id?: string | null
+          token_type?: string
+          type?: string
           user_id?: string
         }
         Relationships: []
