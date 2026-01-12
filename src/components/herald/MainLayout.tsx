@@ -16,7 +16,7 @@ export function MainLayout({ children, rightSidebar }: MainLayoutProps) {
       </main>
 
       {rightSidebar && (
-        <aside className="w-80 h-screen sticky top-0 p-4 space-y-4 overflow-y-auto hidden lg:block">
+        <aside className="w-80 h-screen sticky top-0 p-4 space-y-4 overflow-y-auto hidden lg:block scrollbar-none">
           {rightSidebar}
         </aside>
       )}

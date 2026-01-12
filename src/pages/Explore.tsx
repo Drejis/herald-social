@@ -73,6 +73,23 @@ export default function Explore() {
     if (reelsRes.data) setReels(reelsRes.data.map(p => ({ ...p, author: p.author as unknown as Creator })));
   };
 
+  // Dummy data for demo
+  const dummyPosts: Post[] = [
+    { id: '1', content: 'Just earned 500 HTTN from my latest video! 🎉 #HeraldLaunch', media_url: null, media_type: null, likes_count: 245, comments_count: 32, shares_count: 18, httn_earned: 500, author: { display_name: 'Sarah Chen', username: 'sarahcreates', avatar_url: null, tier: 'creator', reputation: 2500 } },
+    { id: '2', content: 'The creator economy is changing. Herald is leading the way 🚀', media_url: null, media_type: null, likes_count: 189, comments_count: 24, shares_count: 45, httn_earned: 320, author: { display_name: 'Alex Rivera', username: 'alexr', avatar_url: null, tier: 'herald', reputation: 5200 } },
+    { id: '3', content: 'Completed my weekly tasks and got bonus tokens! Who else is grinding? 💪', media_url: null, media_type: null, likes_count: 156, comments_count: 18, shares_count: 12, httn_earned: 180, author: { display_name: 'Jordan Taylor', username: 'jtaylor', avatar_url: null, tier: 'participant', reputation: 850 } },
+  ];
+
+  const dummyReels: Post[] = [
+    { id: 'r1', content: 'Quick tips for earning more HTTN!', media_url: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400', media_type: 'reel', likes_count: 1240, comments_count: 89, shares_count: 156, httn_earned: 850, author: { display_name: 'Mike Johnson', username: 'mikej', avatar_url: null, tier: 'creator', reputation: 3200 } },
+    { id: 'r2', content: 'Day in my life as a Herald creator', media_url: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400', media_type: 'reel', likes_count: 892, comments_count: 67, shares_count: 98, httn_earned: 620, author: { display_name: 'Emma Wilson', username: 'emmaw', avatar_url: null, tier: 'herald', reputation: 4100 } },
+    { id: 'r3', content: 'Web3 explained in 60 seconds', media_url: 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=400', media_type: 'reel', likes_count: 2100, comments_count: 145, shares_count: 320, httn_earned: 1200, author: { display_name: 'David Kim', username: 'davidk', avatar_url: null, tier: 'partner', reputation: 8500 } },
+    { id: 'r4', content: 'How I earned 10K HTTN this month', media_url: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=400', media_type: 'reel', likes_count: 756, comments_count: 43, shares_count: 67, httn_earned: 480, author: { display_name: 'Lisa Park', username: 'lisap', avatar_url: null, tier: 'creator', reputation: 2800 } },
+  ];
+
+  const displayPosts = trendingPosts.length > 0 ? trendingPosts : dummyPosts;
+  const displayReels = reels.length > 0 ? reels : dummyReels;
+
   const trendingTopics = [
     { name: '#HeraldLaunch', posts: 1234 },
     { name: '#Web3Creators', posts: 856 },
@@ -149,10 +166,7 @@ export default function Explore() {
                 Hot Posts
               </h3>
               <div className="grid gap-4">
-                {trendingPosts.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-8">No trending posts yet.</p>
-                ) : (
-                  trendingPosts.map((post) => (
+                {displayPosts.map((post) => (
                     <Card key={post.id} className="bg-card border-border">
                       <CardContent className="p-4">
                         <div className="flex items-start gap-3">
@@ -187,11 +201,8 @@ export default function Explore() {
                         </div>
                       </CardContent>
                     </Card>
-                  ))
-                )}
+                ))}
               </div>
-            </div>
-          </TabsContent>
 
           {/* Creators Tab */}
           <TabsContent value="creators" className="mt-6">

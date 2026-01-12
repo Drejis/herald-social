@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Image, Video, Film, Send, Sparkles } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { MediaUpload } from './MediaUpload';
 
 interface CreatePostDialogProps {
   open: boolean;
@@ -19,6 +20,7 @@ export function CreatePostDialog({ open, onOpenChange, onPostCreated }: CreatePo
   const { toast } = useToast();
   const [content, setContent] = useState('');
   const [mediaType, setMediaType] = useState<string | null>(null);
+  const [mediaUrl, setMediaUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
@@ -30,6 +32,7 @@ export function CreatePostDialog({ open, onOpenChange, onPostCreated }: CreatePo
         author_id: user.id,
         content: content.trim(),
         media_type: mediaType,
+        media_url: mediaUrl,
       });
 
       if (error) throw error;
@@ -54,6 +57,7 @@ export function CreatePostDialog({ open, onOpenChange, onPostCreated }: CreatePo
 
       setContent('');
       setMediaType(null);
+      setMediaUrl(null);
       onOpenChange(false);
       onPostCreated();
     } catch (error: any) {
@@ -67,9 +71,17 @@ export function CreatePostDialog({ open, onOpenChange, onPostCreated }: CreatePo
     }
   };
 
+  const handleMediaUploaded = (url: string, type: string) => {
+    setMediaUrl(url);
+  };
+
+  const handleMediaRemoved = () => {
+    setMediaUrl(null);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg bg-card border-border">
+      <DialogContent className="sm:max-w-lg bg-card border-border max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-display flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-primary" />
@@ -82,10 +94,13 @@ export function CreatePostDialog({ open, onOpenChange, onPostCreated }: CreatePo
             placeholder="What's on your mind?"
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="min-h-[150px] bg-input border-border resize-none"
+            className="min-h-[120px] bg-input border-border resize-none"
           />
 
-          <Tabs value={mediaType || 'none'} onValueChange={(v) => setMediaType(v === 'none' ? null : v)}>
+          <Tabs value={mediaType || 'none'} onValueChange={(v) => {
+            setMediaType(v === 'none' ? null : v);
+            if (v === 'none') setMediaUrl(null);
+          }}>
             <TabsList className="w-full">
               <TabsTrigger value="none" className="flex-1">Text Only</TabsTrigger>
               <TabsTrigger value="image" className="flex-1 gap-1">
@@ -99,6 +114,16 @@ export function CreatePostDialog({ open, onOpenChange, onPostCreated }: CreatePo
               </TabsTrigger>
             </TabsList>
           </Tabs>
+
+          {user && mediaType && (
+            <MediaUpload
+              userId={user.id}
+              mediaType={mediaType}
+              onMediaUploaded={handleMediaUploaded}
+              onMediaRemoved={handleMediaRemoved}
+              currentMediaUrl={mediaUrl || undefined}
+            />
+          )}
 
           <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
             <span className="text-sm text-muted-foreground">Posting rewards you</span>

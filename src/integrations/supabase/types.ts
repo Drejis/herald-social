@@ -65,6 +65,30 @@ export type Database = {
         }
         Relationships: []
       }
+      conversations: {
+        Row: {
+          created_at: string
+          id: string
+          last_message_at: string
+          user1_id: string
+          user2_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          user1_id: string
+          user2_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          user1_id?: string
+          user2_id?: string
+        }
+        Relationships: []
+      }
       earnings_history: {
         Row: {
           amount: number
@@ -107,6 +131,33 @@ export type Database = {
           follower_id?: string
           following_id?: string
           id?: string
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          read: boolean
+          receiver_id: string
+          sender_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          read?: boolean
+          receiver_id: string
+          sender_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          read?: boolean
+          receiver_id?: string
+          sender_id?: string
         }
         Relationships: []
       }
@@ -241,6 +292,7 @@ export type Database = {
           followers_count: number | null
           following_count: number | null
           id: string
+          is_creator: boolean | null
           is_verified: boolean | null
           reputation: number | null
           tier: string | null
@@ -258,6 +310,7 @@ export type Database = {
           followers_count?: number | null
           following_count?: number | null
           id?: string
+          is_creator?: boolean | null
           is_verified?: boolean | null
           reputation?: number | null
           tier?: string | null
@@ -275,6 +328,7 @@ export type Database = {
           followers_count?: number | null
           following_count?: number | null
           id?: string
+          is_creator?: boolean | null
           is_verified?: boolean | null
           reputation?: number | null
           tier?: string | null
@@ -283,6 +337,42 @@ export type Database = {
           user_id?: string
           username?: string | null
           verification_points_threshold?: number | null
+        }
+        Relationships: []
+      }
+      scheduled_posts: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          media_type: string | null
+          media_url: string | null
+          scheduled_for: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          media_type?: string | null
+          media_url?: string | null
+          scheduled_for: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          media_type?: string | null
+          media_url?: string | null
+          scheduled_for?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
