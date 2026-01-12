@@ -4,8 +4,10 @@ import { PostCard } from '@/components/herald/PostCard';
 import { WalletPreview } from '@/components/herald/WalletPreview';
 import { TasksPanel } from '@/components/herald/TasksPanel';
 import { CreatePostDialog } from '@/components/herald/CreatePostDialog';
+import { SchedulePostDialog } from '@/components/herald/SchedulePostDialog';
+import { FloatingMessageButton } from '@/components/herald/FloatingMessageButton';
 import { Button } from '@/components/ui/button';
-import { Sparkles, PenSquare, TrendingUp, ArrowUpRight } from 'lucide-react';
+import { Sparkles, PenSquare, TrendingUp, ArrowUpRight, Calendar } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import heroBg from '@/assets/herald-hero-bg.jpg';
@@ -60,6 +62,7 @@ export default function Feed() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [topCreators, setTopCreators] = useState<Profile[]>([]);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -263,10 +266,16 @@ export default function Feed() {
       <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-lg border-b border-border">
         <div className="p-4 flex items-center justify-between">
           <h1 className="font-display font-bold text-xl text-foreground">Feed</h1>
-          <Button variant="gold" size="sm" className="gap-2" onClick={() => setCreateDialogOpen(true)}>
-            <PenSquare className="w-4 h-4" />
-            Create
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" className="gap-2" onClick={() => setScheduleDialogOpen(true)}>
+              <Calendar className="w-4 h-4" />
+              Schedule
+            </Button>
+            <Button variant="gold" size="sm" className="gap-2" onClick={() => setCreateDialogOpen(true)}>
+              <PenSquare className="w-4 h-4" />
+              Create
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -384,6 +393,14 @@ export default function Feed() {
         onOpenChange={setCreateDialogOpen}
         onPostCreated={fetchPosts}
       />
+
+      <SchedulePostDialog
+        open={scheduleDialogOpen}
+        onOpenChange={setScheduleDialogOpen}
+        onPostScheduled={fetchPosts}
+      />
+
+      <FloatingMessageButton />
     </MainLayout>
   );
 }

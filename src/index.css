@@ -136,6 +136,15 @@
   .glow-gold-sm {
     filter: drop-shadow(0 0 4px hsl(var(--herald-gold) / 0.4));
   }
+
+  .scrollbar-none {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 @keyframes rewardPulse {

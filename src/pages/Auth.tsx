@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -6,15 +6,37 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Sparkles, Wallet, Zap, Users, ArrowRight, Check } from 'lucide-react';
+import { Sparkles, Wallet, Zap, Users, ArrowRight, Check, Volume2, VolumeX } from 'lucide-react';
 import heroBg from '@/assets/herald-hero-bg.jpg';
+
+// Sample social video URLs for demo
+const DEMO_VIDEOS = [
+  'https://assets.mixkit.co/videos/preview/mixkit-group-of-friends-partying-happily-4640-large.mp4',
+  'https://assets.mixkit.co/videos/preview/mixkit-young-woman-taking-selfie-while-having-coffee-42556-large.mp4',
+  'https://assets.mixkit.co/videos/preview/mixkit-woman-smiling-at-her-cellphone-4878-large.mp4',
+];
 
 export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Auto-play next video when current ends
+    const video = videoRef.current;
+    if (video) {
+      const handleEnded = () => {
+        setCurrentVideoIndex((prev) => (prev + 1) % DEMO_VIDEOS.length);
+      };
+      video.addEventListener('ended', handleEnded);
+      return () => video.removeEventListener('ended', handleEnded);
+    }
+  }, [currentVideoIndex]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,13 +72,29 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen flex">
-      {/* Left side - Hero */}
+      {/* Left side - Hero with Video Background */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-        <div 
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${heroBg})` }}
+        {/* Video Background */}
+        <video
+          ref={videoRef}
+          src={DEMO_VIDEOS[currentVideoIndex]}
+          className="absolute inset-0 w-full h-full object-cover"
+          autoPlay
+          muted={isMuted}
+          playsInline
+          loop={false}
         />
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent" />
+        
+        {/* Mute/Unmute Button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute bottom-6 right-6 z-20 bg-background/50 hover:bg-background/70"
+          onClick={() => setIsMuted(!isMuted)}
+        >
+          {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+        </Button>
         
         <div className="relative z-10 flex flex-col justify-center p-12 max-w-lg">
           <div className="flex items-center gap-3 mb-8">
