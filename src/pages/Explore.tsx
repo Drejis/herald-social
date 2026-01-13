@@ -203,6 +203,8 @@ export default function Explore() {
                     </Card>
                 ))}
               </div>
+            </div>
+          </TabsContent>
 
           {/* Creators Tab */}
           <TabsContent value="creators" className="mt-6">
