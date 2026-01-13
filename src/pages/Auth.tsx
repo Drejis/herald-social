@@ -71,7 +71,7 @@ export default function Auth() {
   ];
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex w-full">
       {/* Left side - Hero with Video Background */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
         {/* Video Background */}
@@ -83,6 +83,7 @@ export default function Auth() {
           muted={isMuted}
           playsInline
           loop={false}
+          onError={() => setCurrentVideoIndex((prev) => (prev + 1) % DEMO_VIDEOS.length)}
         />
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent" />
         

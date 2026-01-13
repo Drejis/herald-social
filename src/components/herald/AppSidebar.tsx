@@ -11,11 +11,13 @@ import {
   LogOut,
   Trophy,
   Megaphone,
+  Users,
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { ThemeToggle } from './ThemeToggle';
 
 export function AppSidebar() {
   const { user, signOut } = useAuth();
@@ -27,11 +29,12 @@ export function AppSidebar() {
   };
 
   const navItems = [
-    { icon: Home, label: 'Feed', path: '/feed' },
+    { icon: Home, label: 'Home', path: '/feed' },
     { icon: Search, label: 'Explore', path: '/explore' },
+    { icon: Bell, label: 'Notifications', path: '/notifications' },
+    { icon: Users, label: 'Communities', path: '/explore?tab=community' },
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
     { icon: Wallet, label: 'Wallet', path: '/wallet' },
-    { icon: Bell, label: 'Notifications', path: '/notifications' },
     { icon: Trophy, label: 'Leaderboard', path: '/leaderboard' },
     { icon: Megaphone, label: 'Ads', path: '/ads' },
     { icon: User, label: 'Profile', path: '/profile' },
@@ -58,27 +61,35 @@ export function AppSidebar() {
             <li key={item.path}>
               <NavLink
                 to={item.path}
-                className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
-                activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                className="flex items-center gap-3 px-4 py-3 rounded-full text-sidebar-foreground hover:bg-sidebar-accent transition-colors text-lg"
+                activeClassName="bg-sidebar-accent text-sidebar-primary font-bold"
               >
-                <item.icon className="w-5 h-5" />
+                <item.icon className="w-6 h-6" />
                 <span>{item.label}</span>
               </NavLink>
             </li>
           ))}
         </ul>
+
+        {/* Post Button */}
+        <Button variant="gold" className="w-full mt-4 py-6 text-lg font-bold rounded-full">
+          Post
+        </Button>
       </nav>
 
       {/* Bottom section */}
       <div className="p-3 border-t border-sidebar-border space-y-1">
-        <NavLink
-          to="/settings"
-          className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
-          activeClassName="bg-sidebar-accent text-sidebar-primary"
-        >
-          <Settings className="w-5 h-5" />
-          <span>Settings</span>
-        </NavLink>
+        <div className="flex items-center justify-between px-4 py-2">
+          <NavLink
+            to="/settings"
+            className="flex items-center gap-3 text-sidebar-foreground hover:text-sidebar-primary transition-colors"
+            activeClassName="text-sidebar-primary"
+          >
+            <Settings className="w-5 h-5" />
+            <span>Settings</span>
+          </NavLink>
+          <ThemeToggle />
+        </div>
         {user && (
           <Button
             variant="ghost"

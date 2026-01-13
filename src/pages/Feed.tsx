@@ -1,16 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { MainLayout } from '@/components/herald/MainLayout';
-import { PostCard } from '@/components/herald/PostCard';
+import { TwitterStylePost } from '@/components/herald/TwitterStylePost';
 import { WalletPreview } from '@/components/herald/WalletPreview';
 import { TasksPanel } from '@/components/herald/TasksPanel';
 import { CreatePostDialog } from '@/components/herald/CreatePostDialog';
 import { SchedulePostDialog } from '@/components/herald/SchedulePostDialog';
 import { FloatingMessageButton } from '@/components/herald/FloatingMessageButton';
+import { TrendingSection } from '@/components/herald/TrendingSection';
+import { AdCard, dummyAds } from '@/components/herald/AdCard';
 import { Button } from '@/components/ui/button';
-import { Sparkles, PenSquare, TrendingUp, ArrowUpRight, Calendar } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Sparkles, Image, Smile, Calendar, MapPin, BadgeCheck } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import heroBg from '@/assets/herald-hero-bg.jpg';
 
 interface WalletBalance {
   httn_points: number;
@@ -25,6 +27,8 @@ interface Profile {
   tier: string;
   reputation: number;
   avatar_url: string | null;
+  is_creator: boolean;
+  is_verified: boolean;
 }
 
 interface UserTask {
@@ -50,9 +54,58 @@ interface Post {
   created_at: string;
   author: Profile;
   author_id: string;
-  isLiked?: boolean;
-  isShared?: boolean;
 }
+
+// Dummy verified creators for demo
+const dummyVerifiedCreators = [
+  { id: 'v1', displayName: 'Herald Official', username: 'herald', avatar: null, isGoldVerified: true },
+  { id: 'v2', displayName: 'Sarah Chen', username: 'sarahcreates', avatar: null, isGoldVerified: true },
+  { id: 'v3', displayName: 'Alex Rivera', username: 'alexr', avatar: null, isGoldVerified: true },
+];
+
+// Dummy posts for demo
+const dummyPosts = [
+  {
+    id: 'd1',
+    content: 'Just launched our community impact report! 🚀 This quarter we helped 500+ creators earn their first HTTN tokens. The future of creator economy is here.',
+    author: { id: 'v1', displayName: 'Herald Official', username: 'herald', avatar: null, isGoldVerified: true, isVerified: true },
+    likes: 1234,
+    comments: 89,
+    reposts: 234,
+    httnEarned: 450,
+    createdAt: new Date(Date.now() - 1000 * 60 * 30),
+  },
+  {
+    id: 'd2',
+    content: 'Every contribution matters. Every voice counts. Today I learned that my small daily actions have compounded into real impact. Thank you, Herald community. 💛',
+    author: { id: 'v2', displayName: 'Sarah Chen', username: 'sarahcreates', avatar: null, isGoldVerified: true, isVerified: true },
+    likes: 567,
+    comments: 45,
+    reposts: 123,
+    httnEarned: 320,
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2),
+  },
+  {
+    id: 'd3',
+    content: 'Web3 isn\'t about speculation. It\'s about ownership. It\'s about creators finally getting what they deserve. Herald gets it. 🙌',
+    author: { id: 'v3', displayName: 'Alex Rivera', username: 'alexr', avatar: null, isGoldVerified: true, isVerified: true },
+    likes: 892,
+    comments: 67,
+    reposts: 189,
+    httnEarned: 560,
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 4),
+  },
+  {
+    id: 'd4',
+    content: 'Completed my weekly tasks and got bonus tokens! Who else is grinding? 💪 #HTTNRewards',
+    author: { id: 'u1', displayName: 'Jordan Taylor', username: 'jtaylor', avatar: null, isGoldVerified: false, isVerified: false },
+    likes: 156,
+    comments: 18,
+    reposts: 12,
+    httnEarned: 80,
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 6),
+  },
+];
 
 export default function Feed() {
   const { user } = useAuth();
@@ -63,14 +116,34 @@ export default function Feed() {
   const [topCreators, setTopCreators] = useState<Profile[]>([]);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false);
+  const [postContent, setPostContent] = useState('');
+  const [isPosting, setIsPosting] = useState(false);
 
   useEffect(() => {
     if (user) {
       fetchUserData();
       fetchPosts();
       fetchTopCreators();
+      subscribeToNewPosts();
     }
   }, [user]);
+
+  const subscribeToNewPosts = () => {
+    const channel = supabase
+      .channel('feed-posts')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'posts' },
+        () => {
+          fetchPosts();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  };
 
   const fetchUserData = async () => {
     if (!user) return;
@@ -91,7 +164,7 @@ export default function Feed() {
       .from('posts')
       .select(`
         *,
-        author:profiles!posts_author_id_fkey(display_name, username, tier, reputation, avatar_url)
+        author:profiles!posts_author_id_fkey(display_name, username, tier, reputation, avatar_url, is_creator, is_verified)
       `)
       .order('created_at', { ascending: false })
       .limit(20);
@@ -120,14 +193,15 @@ export default function Feed() {
       interaction_type: 'like',
     });
 
-    await supabase.from('posts').update({ 
-      likes_count: posts.find(p => p.id === postId)!.likes_count + 1 
-    }).eq('id', postId);
-
-    fetchPosts();
+    const post = posts.find(p => p.id === postId);
+    if (post) {
+      await supabase.from('posts').update({ 
+        likes_count: post.likes_count + 1 
+      }).eq('id', postId);
+    }
   };
 
-  const handleShare = async (postId: string) => {
+  const handleRepost = async (postId: string) => {
     if (!user) return;
 
     await supabase.from('post_interactions').insert({
@@ -135,16 +209,6 @@ export default function Feed() {
       user_id: user.id,
       interaction_type: 'share',
     });
-
-    await supabase.from('posts').update({ 
-      shares_count: posts.find(p => p.id === postId)!.shares_count + 1 
-    }).eq('id', postId);
-
-    fetchPosts();
-  };
-
-  const handleTip = (postId: string) => {
-    console.log('Tipping post:', postId);
   };
 
   const handleClaimTask = async (taskId: string) => {
@@ -161,6 +225,27 @@ export default function Feed() {
       }).eq('user_id', user.id);
     }
 
+    fetchUserData();
+  };
+
+  const handleQuickPost = async () => {
+    if (!user || !postContent.trim()) return;
+    
+    setIsPosting(true);
+    await supabase.from('posts').insert({
+      author_id: user.id,
+      content: postContent.trim(),
+    });
+
+    if (wallet) {
+      await supabase.from('wallets').update({
+        httn_points: wallet.httn_points + 25,
+      }).eq('user_id', user.id);
+    }
+
+    setPostContent('');
+    setIsPosting(false);
+    fetchPosts();
     fetchUserData();
   };
 
@@ -183,207 +268,169 @@ export default function Feed() {
   }));
 
   const rightSidebar = (
-    <>
+    <div className="space-y-4">
       <WalletPreview balance={walletBalance} />
+      <TrendingSection />
       <TasksPanel tasks={formattedTasks} onClaim={handleClaimTask} />
       
-      {/* Top Creators */}
+      {/* Who to follow */}
       <div className="herald-card p-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <h3 className="font-display font-semibold text-foreground flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-primary" />
-            Top Creators
-          </h3>
-        </div>
+        <h3 className="font-display font-semibold text-foreground">Who to follow</h3>
         <div className="space-y-3">
-          {topCreators.map((creator) => (
+          {dummyVerifiedCreators.map((creator) => (
             <div
-              key={creator.username}
-              className="flex items-center justify-between p-2 rounded-lg hover:bg-secondary/50 transition-colors cursor-pointer"
+              key={creator.id}
+              className="flex items-center justify-between"
             >
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-sm font-display font-bold text-foreground">
-                  {creator.display_name?.[0] || '?'}
+                <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center font-display font-bold text-foreground">
+                  {creator.displayName[0]}
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-foreground">
-                    {creator.display_name}
+                  <p className="text-sm font-semibold text-foreground flex items-center gap-1">
+                    {creator.displayName}
+                    {creator.isGoldVerified && (
+                      <BadgeCheck className="w-4 h-4 text-primary fill-primary/20" />
+                    )}
                   </p>
-                  <p className="text-xs text-muted-foreground">
-                    {creator.reputation} Rep
-                  </p>
+                  <p className="text-xs text-muted-foreground">@{creator.username}</p>
                 </div>
               </div>
-              <Button variant="ghost" size="sm" className="text-xs">
+              <Button variant="outline" size="sm" className="rounded-full font-semibold">
                 Follow
               </Button>
             </div>
           ))}
         </div>
       </div>
-
-      {/* Value Flow Info */}
-      <div className="herald-card p-4 space-y-3 relative overflow-hidden">
-        <div 
-          className="absolute inset-0 opacity-20"
-          style={{
-            backgroundImage: `url(${heroBg})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
-        />
-        <div className="relative z-10">
-          <h3 className="font-display font-semibold text-foreground">How Value Flows</h3>
-          <div className="mt-3 space-y-2">
-            <div className="flex items-center gap-2 text-sm">
-              <span className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-xs text-primary">1</span>
-              <span className="text-muted-foreground">Create & Engage</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <span className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-xs text-primary">2</span>
-              <span className="text-muted-foreground">Earn HTTN Points</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <span className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-xs text-primary">3</span>
-              <span className="text-muted-foreground">Convert to Tokens</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <span className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-xs text-primary-foreground">4</span>
-              <span className="text-foreground font-medium">Redeem as Espees</span>
-            </div>
-          </div>
-          <Button variant="gold-outline" size="sm" className="w-full mt-4 gap-1">
-            Learn More <ArrowUpRight className="w-3 h-3" />
-          </Button>
-        </div>
-      </div>
-    </>
+    </div>
   );
 
   return (
     <MainLayout rightSidebar={rightSidebar}>
       {/* Header */}
       <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-lg border-b border-border">
-        <div className="p-4 flex items-center justify-between">
-          <h1 className="font-display font-bold text-xl text-foreground">Feed</h1>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="gap-2" onClick={() => setScheduleDialogOpen(true)}>
-              <Calendar className="w-4 h-4" />
-              Schedule
-            </Button>
-            <Button variant="gold" size="sm" className="gap-2" onClick={() => setCreateDialogOpen(true)}>
-              <PenSquare className="w-4 h-4" />
-              Create
-            </Button>
-          </div>
+        <div className="px-4 py-3">
+          <h1 className="font-display font-bold text-xl text-foreground">Home</h1>
         </div>
       </header>
 
-      {/* User welcome card */}
-      {profile && (
-        <div className="p-4 border-b border-border">
-          <div className="herald-card-elevated p-5 relative overflow-hidden">
-            <div 
-              className="absolute inset-0 opacity-30"
-              style={{
-                backgroundImage: `url(${heroBg})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-              }}
+      {/* Compose Box */}
+      <div className="border-b border-border p-4">
+        <div className="flex gap-3">
+          <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center font-display font-bold text-foreground flex-shrink-0">
+            {profile?.display_name?.[0] || '?'}
+          </div>
+          <div className="flex-1">
+            <Textarea
+              placeholder="What's happening?"
+              value={postContent}
+              onChange={(e) => setPostContent(e.target.value)}
+              className="min-h-[80px] border-none bg-transparent resize-none text-lg placeholder:text-muted-foreground focus-visible:ring-0 p-0"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/70 to-transparent" />
-            
-            <div className="relative z-10 flex items-center justify-between">
-              <div>
-                <p className="text-muted-foreground text-sm">Welcome back,</p>
-                <h2 className="font-display font-bold text-2xl text-foreground">
-                  {profile.display_name}
-                </h2>
+            <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="icon" className="text-primary hover:bg-primary/10 rounded-full">
+                  <Image className="w-5 h-5" />
+                </Button>
+                <Button variant="ghost" size="icon" className="text-primary hover:bg-primary/10 rounded-full">
+                  <Smile className="w-5 h-5" />
+                </Button>
+                <Button variant="ghost" size="icon" className="text-primary hover:bg-primary/10 rounded-full" onClick={() => setScheduleDialogOpen(true)}>
+                  <Calendar className="w-5 h-5" />
+                </Button>
+                <Button variant="ghost" size="icon" className="text-primary hover:bg-primary/10 rounded-full">
+                  <MapPin className="w-5 h-5" />
+                </Button>
               </div>
-              <div className="text-right">
-                <div className="flex items-center gap-1.5 justify-end">
-                  <Sparkles className="w-4 h-4 text-primary glow-gold-sm" />
-                  <span className="font-display font-bold text-xl gold-text">
-                    {walletBalance.httnPoints.toLocaleString()}
-                  </span>
-                </div>
-                <p className="text-xs text-muted-foreground">HTTN Points</p>
-              </div>
-            </div>
-
-            {/* Quick stats */}
-            <div className="relative z-10 grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-border/50">
-              <div className="text-center">
-                <p className="font-display font-semibold text-lg text-foreground">
-                  {walletBalance.httnTokens.toFixed(1)}
-                </p>
-                <p className="text-xs text-muted-foreground">Tokens</p>
-              </div>
-              <div className="text-center">
-                <p className="font-display font-semibold text-lg gold-text">
-                  {profile.reputation}
-                </p>
-                <p className="text-xs text-muted-foreground">Reputation</p>
-              </div>
-              <div className="text-center">
-                <p className="font-display font-semibold text-lg text-foreground">
-                  {tasks.length}
-                </p>
-                <p className="text-xs text-muted-foreground">Tasks</p>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Sparkles className="w-3 h-3 text-primary" />
+                  +25 HTTN
+                </span>
+                <Button 
+                  variant="gold" 
+                  className="rounded-full font-semibold"
+                  onClick={handleQuickPost}
+                  disabled={!postContent.trim() || isPosting}
+                >
+                  {isPosting ? 'Posting...' : 'Post'}
+                </Button>
               </div>
             </div>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Feed */}
-      <div className="divide-y divide-border">
-        {posts.length === 0 ? (
-          <div className="p-8 text-center text-muted-foreground">
-            <p>No posts yet. Be the first to create content!</p>
+      <div>
+        {/* Show dummy posts first, then real posts */}
+        {dummyPosts.map((post, index) => (
+          <div key={post.id}>
+            <TwitterStylePost
+              id={post.id}
+              author={post.author}
+              content={post.content}
+              likes={post.likes}
+              comments={post.comments}
+              reposts={post.reposts}
+              httnEarned={post.httnEarned}
+              createdAt={post.createdAt}
+              onLike={handleLike}
+              onRepost={handleRepost}
+            />
+            {/* Insert ads between posts */}
+            {index === 1 && (
+              <div className="px-4 py-3 border-b border-border">
+                <AdCard {...dummyAds[0]} />
+              </div>
+            )}
           </div>
-        ) : (
-          posts.map((post) => (
-            <div key={post.id} className="p-4">
-              <PostCard
-                post={{
-                  id: post.id,
-                  content: post.content,
-                  mediaUrl: post.media_url || undefined,
-                  mediaType: post.media_type as 'image' | 'video' | 'audio' | undefined,
-                  likes: post.likes_count,
-                  comments: post.comments_count,
-                  shares: post.shares_count,
-                  httnEarned: post.httn_earned,
-                  createdAt: new Date(post.created_at),
-                  isLiked: post.isLiked || false,
-                  isShared: post.isShared || false,
-                  author: {
-                    id: post.author_id,
-                    username: post.author?.username || 'unknown',
-                    displayName: post.author?.display_name || 'Unknown User',
-                    avatar: post.author?.avatar_url || '',
-                    tier: (post.author?.tier || 'participant') as 'herald' | 'creator' | 'participant' | 'partner',
-                    httnPoints: 0,
-                    httnTokens: 0,
-                    espees: 0,
-                    reputation: post.author?.reputation || 0,
-                    badges: [],
-                    joinedAt: new Date(),
-                  },
-                }}
-                onLike={handleLike}
-                onShare={handleShare}
-                onTip={handleTip}
-              />
-            </div>
-          ))
+        ))}
+
+        {/* Real posts from database */}
+        {posts.map((post, index) => (
+          <div key={post.id}>
+            <TwitterStylePost
+              id={post.id}
+              author={{
+                id: post.author_id,
+                displayName: post.author?.display_name || 'Unknown',
+                username: post.author?.username || 'unknown',
+                avatar: post.author?.avatar_url || null,
+                isVerified: post.author?.is_verified || false,
+                isGoldVerified: post.author?.is_verified && post.author?.is_creator,
+              }}
+              content={post.content}
+              mediaUrl={post.media_url || undefined}
+              mediaType={post.media_type as 'image' | 'video' | undefined}
+              likes={post.likes_count}
+              comments={post.comments_count}
+              reposts={post.shares_count}
+              httnEarned={post.httn_earned}
+              createdAt={new Date(post.created_at)}
+              onLike={handleLike}
+              onRepost={handleRepost}
+            />
+            {/* Insert more ads periodically */}
+            {index === 2 && (
+              <div className="px-4 py-3 border-b border-border">
+                <AdCard {...dummyAds[1]} />
+              </div>
+            )}
+          </div>
+        ))}
+
+        {posts.length === 0 && (
+          <div className="p-8 text-center text-muted-foreground border-b border-border">
+            <p>No more posts. Check back later!</p>
+          </div>
         )}
       </div>
 
       {/* Load more */}
       <div className="p-8 text-center">
-        <Button variant="outline" className="gap-2">
+        <Button variant="outline" className="rounded-full">
           Load more posts
         </Button>
       </div>
