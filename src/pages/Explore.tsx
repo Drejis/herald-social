@@ -85,6 +85,14 @@ export default function Explore() {
     { id: 'r2', content: 'Day in my life as a Herald creator', media_url: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400', media_type: 'reel', likes_count: 892, comments_count: 67, shares_count: 98, httn_earned: 620, author: { display_name: 'Emma Wilson', username: 'emmaw', avatar_url: null, tier: 'herald', reputation: 4100 } },
     { id: 'r3', content: 'Web3 explained in 60 seconds', media_url: 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=400', media_type: 'reel', likes_count: 2100, comments_count: 145, shares_count: 320, httn_earned: 1200, author: { display_name: 'David Kim', username: 'davidk', avatar_url: null, tier: 'partner', reputation: 8500 } },
     { id: 'r4', content: 'How I earned 10K HTTN this month', media_url: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=400', media_type: 'reel', likes_count: 756, comments_count: 43, shares_count: 67, httn_earned: 480, author: { display_name: 'Lisa Park', username: 'lisap', avatar_url: null, tier: 'creator', reputation: 2800 } },
+    { id: 'r5', content: 'Building my brand on Herald 🔥', media_url: 'https://images.unsplash.com/photo-1560472355-536de3962603?w=400', media_type: 'reel', likes_count: 1890, comments_count: 124, shares_count: 234, httn_earned: 980, author: { display_name: 'James Rodriguez', username: 'jamesrod', avatar_url: null, tier: 'herald', reputation: 6700 } },
+    { id: 'r6', content: 'Token economics for beginners', media_url: 'https://images.unsplash.com/photo-1518186285589-2f7649de83e0?w=400', media_type: 'reel', likes_count: 2340, comments_count: 189, shares_count: 456, httn_earned: 1450, author: { display_name: 'Nina Patel', username: 'ninapatel', avatar_url: null, tier: 'partner', reputation: 9200 } },
+    { id: 'r7', content: 'Morning routine of a top creator', media_url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400', media_type: 'reel', likes_count: 567, comments_count: 34, shares_count: 78, httn_earned: 320, author: { display_name: 'Chris Lee', username: 'chrislee', avatar_url: null, tier: 'creator', reputation: 2100 } },
+    { id: 'r8', content: 'My 1 million HTTN journey', media_url: 'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=400', media_type: 'reel', likes_count: 4500, comments_count: 345, shares_count: 890, httn_earned: 2800, author: { display_name: 'Marcus King', username: 'marcusk', avatar_url: null, tier: 'herald', reputation: 15000 } },
+    { id: 'r9', content: 'Create viral content in 5 steps', media_url: 'https://images.unsplash.com/photo-1551650975-87deedd944c3?w=400', media_type: 'reel', likes_count: 1678, comments_count: 98, shares_count: 234, httn_earned: 890, author: { display_name: 'Sofia Martinez', username: 'sofiam', avatar_url: null, tier: 'creator', reputation: 4300 } },
+    { id: 'r10', content: 'Community building masterclass', media_url: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400', media_type: 'reel', likes_count: 987, comments_count: 67, shares_count: 145, httn_earned: 540, author: { display_name: 'Ryan Chen', username: 'ryanchen', avatar_url: null, tier: 'creator', reputation: 3400 } },
+    { id: 'r11', content: 'What nobody tells you about Web3', media_url: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400', media_type: 'reel', likes_count: 3200, comments_count: 267, shares_count: 567, httn_earned: 1890, author: { display_name: 'Alex Thompson', username: 'alexthompson', avatar_url: null, tier: 'partner', reputation: 11000 } },
+    { id: 'r12', content: 'From 0 to 10K followers', media_url: 'https://images.unsplash.com/photo-1533227268428-f9ed0900fb3b?w=400', media_type: 'reel', likes_count: 2100, comments_count: 156, shares_count: 345, httn_earned: 1200, author: { display_name: 'Emily Zhang', username: 'emilyzhang', avatar_url: null, tier: 'herald', reputation: 7800 } },
   ];
 
   const displayPosts = trendingPosts.length > 0 ? trendingPosts : dummyPosts;
@@ -251,50 +259,45 @@ export default function Explore() {
           {/* Reels Tab */}
           <TabsContent value="reels" className="mt-6">
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {reels.length === 0 ? (
-                <p className="col-span-full text-muted-foreground text-center py-8">
-                  No reels yet. Be the first to create one!
-                </p>
-              ) : (
-                reels.map((reel) => (
-                  <div 
-                    key={reel.id} 
-                    className="aspect-[9/16] rounded-xl bg-secondary relative overflow-hidden cursor-pointer group"
-                  >
-                    {reel.media_url && (
-                      <img 
-                        src={reel.media_url} 
-                        alt=""
-                        className="absolute inset-0 w-full h-full object-cover"
-                      />
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
-                    <div className="absolute bottom-0 left-0 right-0 p-3">
-                      <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center text-xs font-bold">
-                          {reel.author?.display_name?.[0] || '?'}
-                        </div>
-                        <span className="text-xs text-foreground font-medium">
-                          {reel.author?.display_name}
-                        </span>
+              {displayReels.map((reel) => (
+                <div 
+                  key={reel.id} 
+                  className="aspect-[9/16] rounded-xl bg-secondary relative overflow-hidden cursor-pointer group"
+                >
+                  {reel.media_url && (
+                    <img 
+                      src={reel.media_url} 
+                      alt=""
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center text-xs font-bold">
+                        {reel.author?.display_name?.[0] || '?'}
                       </div>
-                      <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Heart className="w-3 h-3" /> {reel.likes_count}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <MessageCircle className="w-3 h-3" /> {reel.comments_count}
-                        </span>
-                      </div>
+                      <span className="text-xs text-foreground font-medium">
+                        {reel.author?.display_name}
+                      </span>
                     </div>
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <div className="w-12 h-12 rounded-full bg-primary/80 flex items-center justify-center">
-                        <Play className="w-6 h-6 text-primary-foreground" />
-                      </div>
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{reel.content}</p>
+                    <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Heart className="w-3 h-3" /> {reel.likes_count >= 1000 ? `${(reel.likes_count / 1000).toFixed(1)}K` : reel.likes_count}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <MessageCircle className="w-3 h-3" /> {reel.comments_count}
+                      </span>
                     </div>
                   </div>
-                ))
-              )}
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="w-12 h-12 rounded-full bg-primary/80 flex items-center justify-center">
+                      <Play className="w-6 h-6 text-primary-foreground" />
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </TabsContent>
 
