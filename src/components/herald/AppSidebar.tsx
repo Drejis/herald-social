@@ -93,7 +93,7 @@ export function AppSidebar() {
         {user && (
           <Button
             variant="ghost"
-            className="w-full justify-start gap-3 px-4 py-3 text-muted-foreground hover:text-destructive"
+            className="w-full justify-start gap-3 px-4 py-3 text-rose-400 hover:text-rose-500 hover:bg-rose-500/10"
             onClick={handleSignOut}
           >
             <LogOut className="w-5 h-5" />
