@@ -10,9 +10,17 @@ interface AvatarUploadProps {
   currentAvatarUrl: string | null;
   displayName: string | null;
   onAvatarChange: (url: string) => void;
+  size?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
-export function AvatarUpload({ userId, currentAvatarUrl, displayName, onAvatarChange }: AvatarUploadProps) {
+const sizeClasses = {
+  sm: 'w-10 h-10',
+  md: 'w-16 h-16',
+  lg: 'w-24 h-24',
+  xl: 'w-32 h-32',
+};
+
+export function AvatarUpload({ userId, currentAvatarUrl, displayName, onAvatarChange, size = 'lg' }: AvatarUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -109,7 +117,7 @@ export function AvatarUpload({ userId, currentAvatarUrl, displayName, onAvatarCh
 
   return (
     <div className="relative group">
-      <Avatar className="w-24 h-24 border-4 border-background">
+      <Avatar className={`${sizeClasses[size]} border-4 border-background`}>
         <AvatarImage src={previewUrl || currentAvatarUrl || ''} />
         <AvatarFallback className="text-2xl font-display font-bold bg-secondary">
           {displayName?.[0] || '?'}

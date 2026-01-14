@@ -14,6 +14,7 @@ import Settings from "./pages/Settings";
 import Leaderboard from "./pages/Leaderboard";
 import Notifications from "./pages/Notifications";
 import Ads from "./pages/Ads";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +44,7 @@ const AppRoutes = () => {
       <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
       <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
       <Route path="/ads" element={<ProtectedRoute><Ads /></ProtectedRoute>} />
+      <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
