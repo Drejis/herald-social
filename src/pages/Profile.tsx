@@ -28,6 +28,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { AvatarUpload } from '@/components/herald/AvatarUpload';
 import { useNavigate } from 'react-router-dom';
+import { VerticalAdBanner, verticalAds } from '@/components/herald/VerticalAdBanner';
 
 interface ProfileData {
   id: string;
@@ -183,8 +184,14 @@ export default function Profile() {
     return new Date(dateStr).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   };
 
+  const rightSidebar = (
+    <div className="space-y-4">
+      <VerticalAdBanner {...verticalAds[2]} />
+    </div>
+  );
+
   return (
-    <MainLayout>
+    <MainLayout rightSidebar={rightSidebar}>
       <div className="min-h-screen">
         {/* Header with back button */}
         <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-lg border-b border-border">

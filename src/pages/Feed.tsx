@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { MainLayout } from '@/components/herald/MainLayout';
 import { TwitterStylePost } from '@/components/herald/TwitterStylePost';
 import { WalletPreview } from '@/components/herald/WalletPreview';
@@ -7,12 +7,14 @@ import { CreatePostDialog } from '@/components/herald/CreatePostDialog';
 import { SchedulePostDialog } from '@/components/herald/SchedulePostDialog';
 import { FloatingMessageButton } from '@/components/herald/FloatingMessageButton';
 import { TrendingSection } from '@/components/herald/TrendingSection';
-import { AdCard, dummyAds } from '@/components/herald/AdCard';
+import { RightSidebarWithAds } from '@/components/herald/RightSidebarWithAds';
+import { VerticalAdBanner, verticalAds } from '@/components/herald/VerticalAdBanner';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Sparkles, Image, Smile, Calendar, MapPin, BadgeCheck } from 'lucide-react';
+import { Sparkles, Image, Smile, Calendar, MapPin, BadgeCheck, Loader2, RefreshCw } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { useRealTimeNotifications } from '@/hooks/useRealTimeNotifications';
 
 interface WalletBalance {
   httn_points: number;
@@ -109,6 +111,7 @@ const dummyPosts = [
 
 export default function Feed() {
   const { user } = useAuth();
+  const { createNotification } = useRealTimeNotifications();
   const [wallet, setWallet] = useState<WalletBalance | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [tasks, setTasks] = useState<UserTask[]>([]);
@@ -118,6 +121,11 @@ export default function Feed() {
   const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false);
   const [postContent, setPostContent] = useState('');
   const [isPosting, setIsPosting] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [newPostsAvailable, setNewPostsAvailable] = useState(0);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -128,14 +136,20 @@ export default function Feed() {
     }
   }, [user]);
 
-  const subscribeToNewPosts = () => {
+  const subscribeToNewPosts = useCallback(() => {
     const channel = supabase
       .channel('feed-posts')
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'posts' },
-        () => {
-          fetchPosts();
+        (payload) => {
+          const newPost = payload.new;
+          // If it's not the current user's post, show notification
+          if (newPost.author_id !== user?.id) {
+            setNewPostsAvailable(prev => prev + 1);
+          } else {
+            fetchPosts();
+          }
         }
       )
       .subscribe();
@@ -143,6 +157,56 @@ export default function Feed() {
     return () => {
       supabase.removeChannel(channel);
     };
+  }, [user]);
+
+  // Infinite scroll setup
+  useEffect(() => {
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isLoadingMore) {
+          loadMorePosts();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (loadMoreRef.current) {
+      observerRef.current.observe(loadMoreRef.current);
+    }
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [hasMore, isLoadingMore, posts]);
+
+  const loadMorePosts = async () => {
+    if (isLoadingMore || !hasMore || posts.length === 0) return;
+    
+    setIsLoadingMore(true);
+    const lastPost = posts[posts.length - 1];
+    
+    const { data } = await supabase
+      .from('posts')
+      .select(`
+        *,
+        author:profiles!posts_author_id_fkey(display_name, username, tier, reputation, avatar_url, is_creator, is_verified)
+      `)
+      .lt('created_at', lastPost.created_at)
+      .order('created_at', { ascending: false })
+      .limit(10);
+
+    if (data) {
+      if (data.length < 10) setHasMore(false);
+      setPosts(prev => [...prev, ...data.map(p => ({ ...p, author: p.author as unknown as Profile }))]);
+    }
+    setIsLoadingMore(false);
+  };
+
+  const loadNewPosts = async () => {
+    await fetchPosts();
+    setNewPostsAvailable(0);
   };
 
   const fetchUserData = async () => {
@@ -198,7 +262,20 @@ export default function Feed() {
       await supabase.from('posts').update({ 
         likes_count: post.likes_count + 1 
       }).eq('id', postId);
+
+      // Send notification to post author
+      if (post.author_id !== user.id) {
+        createNotification(
+          post.author_id,
+          'like',
+          'New Like',
+          'liked your post',
+          postId,
+          'post'
+        );
+      }
     }
+    fetchPosts();
   };
 
   const handleRepost = async (postId: string) => {
@@ -209,6 +286,19 @@ export default function Feed() {
       user_id: user.id,
       interaction_type: 'share',
     });
+
+    const post = posts.find(p => p.id === postId);
+    if (post && post.author_id !== user.id) {
+      createNotification(
+        post.author_id,
+        'share',
+        'Repost!',
+        'reposted your content',
+        postId,
+        'post'
+      );
+    }
+    fetchPosts();
   };
 
   const handleClaimTask = async (taskId: string) => {
@@ -268,7 +358,7 @@ export default function Feed() {
   }));
 
   const rightSidebar = (
-    <div className="space-y-4">
+    <RightSidebarWithAds>
       <WalletPreview balance={walletBalance} />
       <TrendingSection />
       <TasksPanel tasks={formattedTasks} onClaim={handleClaimTask} />
@@ -303,7 +393,7 @@ export default function Feed() {
           ))}
         </div>
       </div>
-    </div>
+    </RightSidebarWithAds>
   );
 
   return (
@@ -362,6 +452,17 @@ export default function Feed() {
         </div>
       </div>
 
+      {/* New posts notification */}
+      {newPostsAvailable > 0 && (
+        <button
+          onClick={loadNewPosts}
+          className="w-full py-3 bg-primary/10 text-primary text-sm font-medium border-b border-border hover:bg-primary/20 transition-colors flex items-center justify-center gap-2"
+        >
+          <RefreshCw className="w-4 h-4" />
+          Show {newPostsAvailable} new post{newPostsAvailable > 1 ? 's' : ''}
+        </button>
+      )}
+
       {/* Feed */}
       <div>
         {/* Show dummy posts first, then real posts */}
@@ -382,7 +483,7 @@ export default function Feed() {
             {/* Insert ads between posts */}
             {index === 1 && (
               <div className="px-4 py-3 border-b border-border">
-                <AdCard {...dummyAds[0]} />
+                <VerticalAdBanner {...verticalAds[0]} />
               </div>
             )}
           </div>
@@ -415,7 +516,7 @@ export default function Feed() {
             {/* Insert more ads periodically */}
             {index === 2 && (
               <div className="px-4 py-3 border-b border-border">
-                <AdCard {...dummyAds[1]} />
+                <VerticalAdBanner {...verticalAds[1]} />
               </div>
             )}
           </div>
@@ -428,11 +529,20 @@ export default function Feed() {
         )}
       </div>
 
-      {/* Load more */}
-      <div className="p-8 text-center">
-        <Button variant="outline" className="rounded-full">
-          Load more posts
-        </Button>
+      {/* Load more / Infinite scroll trigger */}
+      <div ref={loadMoreRef} className="p-8 text-center">
+        {isLoadingMore ? (
+          <div className="flex items-center justify-center gap-2 text-muted-foreground">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            <span>Loading more posts...</span>
+          </div>
+        ) : hasMore ? (
+          <Button variant="outline" className="rounded-full" onClick={loadMorePosts}>
+            Load more posts
+          </Button>
+        ) : (
+          <p className="text-sm text-muted-foreground">You've reached the end!</p>
+        )}
       </div>
 
       <CreatePostDialog 

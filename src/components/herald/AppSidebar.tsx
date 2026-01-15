@@ -39,7 +39,7 @@ export function AppSidebar() {
     { icon: Trophy, label: 'Leaderboard', path: '/leaderboard' },
     { icon: Megaphone, label: 'Ads', path: '/ads' },
     { icon: User, label: 'Profile', path: '/profile' },
-    { icon: Store, label: 'E-Store', path: '/user/herald_official' },
+    { icon: Store, label: 'E-Store', path: '/store' },
   ];
 
   return (

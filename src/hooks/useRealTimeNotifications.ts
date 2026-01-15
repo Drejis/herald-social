@@ -176,6 +176,38 @@ export function useRealTimeNotifications() {
     }
   };
 
+  // Create notification helper for other parts of the app
+  const createNotification = useCallback(async (
+    targetUserId: string,
+    type: string,
+    title: string,
+    message: string,
+    referenceId?: string,
+    referenceType?: string
+  ) => {
+    if (!user) return;
+
+    // Get current user's profile for actor info
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('display_name, avatar_url, is_verified')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    await supabase.from('notifications').insert({
+      user_id: targetUserId,
+      type,
+      title,
+      message,
+      actor_id: user.id,
+      actor_name: profile?.display_name || 'Someone',
+      actor_avatar: profile?.avatar_url,
+      actor_verified: profile?.is_verified || false,
+      reference_id: referenceId,
+      reference_type: referenceType,
+    });
+  }, [user]);
+
   return {
     notifications,
     unreadCount,
@@ -184,6 +216,7 @@ export function useRealTimeNotifications() {
     markAllAsRead,
     deleteNotification,
     clearAll,
+    createNotification,
     refetch: fetchNotifications,
   };
 }
