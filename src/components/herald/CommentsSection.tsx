@@ -26,11 +26,12 @@ interface Comment {
 
 interface CommentsSectionProps {
   postId: string;
-  isOpen: boolean;
-  onClose: () => void;
+  isOpen?: boolean;
+  onClose?: () => void;
+  onCommentAdded?: () => void;
 }
 
-export function CommentsSection({ postId, isOpen, onClose }: CommentsSectionProps) {
+export function CommentsSection({ postId, isOpen = true, onClose, onCommentAdded }: CommentsSectionProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [comments, setComments] = useState<Comment[]>([]);
@@ -113,6 +114,7 @@ export function CommentsSection({ postId, isOpen, onClose }: CommentsSectionProp
       toast({ title: 'Error', description: 'Failed to post comment', variant: 'destructive' });
     } else {
       setNewComment('');
+      onCommentAdded?.();
       // Update post comments count
       const { data: post } = await supabase.from('posts').select('comments_count').eq('id', postId).single();
       if (post) {

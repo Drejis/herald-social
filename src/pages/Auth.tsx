@@ -72,30 +72,15 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen flex w-full">
-      {/* Left side - Hero with Video Background */}
+      {/* Left side - Hero with Image Background */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-        {/* Video Background */}
-        <video
-          ref={videoRef}
-          src={DEMO_VIDEOS[currentVideoIndex]}
+        {/* Image Background */}
+        <img
+          src={heroBg}
+          alt="Herald Network"
           className="absolute inset-0 w-full h-full object-cover"
-          autoPlay
-          muted={isMuted}
-          playsInline
-          loop={false}
-          onError={() => setCurrentVideoIndex((prev) => (prev + 1) % DEMO_VIDEOS.length)}
         />
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent" />
-        
-        {/* Mute/Unmute Button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute bottom-6 right-6 z-20 bg-background/50 hover:bg-background/70"
-          onClick={() => setIsMuted(!isMuted)}
-        >
-          {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-        </Button>
         
         <div className="relative z-10 flex flex-col justify-center p-12 max-w-lg">
           <div className="flex items-center gap-3 mb-8">

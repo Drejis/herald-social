@@ -17,6 +17,10 @@ import {
   Share2
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { ScrollableReels } from '@/components/herald/ScrollableReels';
+import { VerticalAdBanner, verticalAds } from '@/components/herald/VerticalAdBanner';
+import { WalletPreview } from '@/components/herald/WalletPreview';
+import { walletBalance } from '@/data/mockData';
 
 interface Creator {
   display_name: string;
@@ -106,8 +110,24 @@ export default function Explore() {
     { name: '#EarnWithHerald', posts: 398 },
   ];
 
+  const [adIndex, setAdIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setAdIndex((prev) => (prev + 1) % verticalAds.length);
+    }, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const rightSidebar = (
+    <>
+      <WalletPreview balance={walletBalance} />
+      <VerticalAdBanner {...verticalAds[adIndex]} />
+    </>
+  );
+
   return (
-    <MainLayout>
+    <MainLayout rightSidebar={rightSidebar}>
       <div className="p-6 space-y-6">
         {/* Search Header */}
         <div className="flex items-center gap-4">
@@ -257,48 +277,8 @@ export default function Explore() {
           </TabsContent>
 
           {/* Reels Tab */}
-          <TabsContent value="reels" className="mt-6">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {displayReels.map((reel) => (
-                <div 
-                  key={reel.id} 
-                  className="aspect-[9/16] rounded-xl bg-secondary relative overflow-hidden cursor-pointer group"
-                >
-                  {reel.media_url && (
-                    <img 
-                      src={reel.media_url} 
-                      alt=""
-                      className="absolute inset-0 w-full h-full object-cover"
-                    />
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-3">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center text-xs font-bold">
-                        {reel.author?.display_name?.[0] || '?'}
-                      </div>
-                      <span className="text-xs text-foreground font-medium">
-                        {reel.author?.display_name}
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{reel.content}</p>
-                    <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Heart className="w-3 h-3" /> {reel.likes_count >= 1000 ? `${(reel.likes_count / 1000).toFixed(1)}K` : reel.likes_count}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <MessageCircle className="w-3 h-3" /> {reel.comments_count}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <div className="w-12 h-12 rounded-full bg-primary/80 flex items-center justify-center">
-                      <Play className="w-6 h-6 text-primary-foreground" />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+          <TabsContent value="reels" className="mt-0 -mx-6 -mb-6">
+            <ScrollableReels />
           </TabsContent>
 
           {/* Community Tab */}
