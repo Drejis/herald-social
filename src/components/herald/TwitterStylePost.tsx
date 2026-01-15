@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Heart,
   MessageCircle,
@@ -16,6 +17,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { CommentsSection } from './CommentsSection';
 
 interface Author {
   id: string;
@@ -77,6 +79,8 @@ export function TwitterStylePost({
   const [isReposted, setIsReposted] = useState(initialReposted);
   const [likeCount, setLikeCount] = useState(likes);
   const [repostCount, setRepostCount] = useState(reposts);
+  const [showComments, setShowComments] = useState(false);
+  const [commentCount, setCommentCount] = useState(comments);
 
   const handleLike = () => {
     setIsLiked(!isLiked);
@@ -90,39 +94,46 @@ export function TwitterStylePost({
     onRepost?.(id);
   };
 
+  const handleToggleComments = () => {
+    setShowComments(!showComments);
+    onComment?.(id);
+  };
+
   return (
-    <article className="px-4 py-3 border-b border-border hover:bg-secondary/30 transition-colors cursor-pointer">
+    <article className="px-4 py-3 border-b border-border hover:bg-secondary/30 transition-colors">
       <div className="flex gap-3">
         {/* Avatar */}
-        <div className="flex-shrink-0">
+        <Link to={`/user/${author.username}`} className="flex-shrink-0">
           {author.avatar ? (
             <img
               src={author.avatar}
               alt={author.displayName}
-              className="w-10 h-10 rounded-full object-cover"
+              className="w-10 h-10 rounded-full object-cover hover:opacity-80 transition-opacity"
             />
           ) : (
-            <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center font-display font-bold text-foreground">
+            <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center font-display font-bold text-foreground hover:opacity-80 transition-opacity">
               {author.displayName[0]}
             </div>
           )}
-        </div>
+        </Link>
 
         {/* Content */}
         <div className="flex-1 min-w-0">
           {/* Header */}
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-1 flex-wrap">
-              <span className="font-semibold text-foreground hover:underline">
+              <Link to={`/user/${author.username}`} className="font-semibold text-foreground hover:underline">
                 {author.displayName}
-              </span>
+              </Link>
               {author.isGoldVerified && (
                 <BadgeCheck className="w-5 h-5 text-primary fill-primary/20" />
               )}
               {author.isVerified && !author.isGoldVerified && (
                 <BadgeCheck className="w-5 h-5 text-blue-400" />
               )}
-              <span className="text-muted-foreground">@{author.username}</span>
+              <Link to={`/user/${author.username}`} className="text-muted-foreground hover:underline">
+                @{author.username}
+              </Link>
               <span className="text-muted-foreground">·</span>
               <span className="text-muted-foreground hover:underline">
                 {formatTimeAgo(createdAt)}
@@ -176,13 +187,15 @@ export function TwitterStylePost({
           {/* Actions */}
           <div className="flex items-center justify-between mt-3 max-w-md">
             <button
-              onClick={() => onComment?.(id)}
-              className="flex items-center gap-1 text-muted-foreground hover:text-blue-400 transition-colors group"
+              onClick={handleToggleComments}
+              className={`flex items-center gap-1 transition-colors group ${
+                showComments ? 'text-blue-400' : 'text-muted-foreground hover:text-blue-400'
+              }`}
             >
               <div className="p-2 rounded-full group-hover:bg-blue-400/10">
                 <MessageCircle className="w-4 h-4" />
               </div>
-              <span className="text-sm">{comments > 0 ? comments : ''}</span>
+              <span className="text-sm">{commentCount > 0 ? commentCount : ''}</span>
             </button>
 
             <button
@@ -221,6 +234,16 @@ export function TwitterStylePost({
               </div>
             </button>
           </div>
+
+          {/* Inline Comments Section */}
+          {showComments && (
+            <div className="mt-3 border-t border-border pt-3">
+              <CommentsSection 
+                postId={id} 
+                onCommentAdded={() => setCommentCount(prev => prev + 1)}
+              />
+            </div>
+          )}
         </div>
       </div>
     </article>

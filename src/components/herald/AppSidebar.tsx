@@ -12,6 +12,7 @@ import {
   Trophy,
   Megaphone,
   Users,
+  Store,
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/hooks/useAuth';
@@ -38,6 +39,7 @@ export function AppSidebar() {
     { icon: Trophy, label: 'Leaderboard', path: '/leaderboard' },
     { icon: Megaphone, label: 'Ads', path: '/ads' },
     { icon: User, label: 'Profile', path: '/profile' },
+    { icon: Store, label: 'E-Store', path: '/user/herald_official' },
   ];
 
   return (
