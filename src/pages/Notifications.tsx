@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useRealTimeNotifications, Notification } from '@/hooks/useRealTimeNotifications';
 import { useState } from 'react';
+import { VerticalAdBanner, verticalAds } from '@/components/herald/VerticalAdBanner';
 
 export default function Notifications() {
   const { 
@@ -77,8 +78,14 @@ export default function Notifications() {
     ? notifications.filter(n => !n.read)
     : notifications;
 
+  const rightSidebar = (
+    <div className="space-y-4">
+      <VerticalAdBanner {...verticalAds[0]} />
+    </div>
+  );
+
   return (
-    <MainLayout>
+    <MainLayout rightSidebar={rightSidebar}>
       <div className="p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">

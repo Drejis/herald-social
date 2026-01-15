@@ -22,6 +22,7 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { ContentInsights } from '@/components/herald/ContentInsights';
+import { VerticalAdBanner, verticalAds } from '@/components/herald/VerticalAdBanner';
 import { 
   LineChart, 
   Line, 
@@ -149,8 +150,14 @@ export default function Dashboard() {
     },
   ];
 
+  const rightSidebar = (
+    <div className="space-y-4">
+      <VerticalAdBanner {...verticalAds[Math.floor(Math.random() * verticalAds.length)]} />
+    </div>
+  );
+
   return (
-    <MainLayout>
+    <MainLayout rightSidebar={rightSidebar}>
       <div className="p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">

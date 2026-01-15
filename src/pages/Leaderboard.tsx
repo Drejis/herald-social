@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { VerticalAdBanner, verticalAds } from '@/components/herald/VerticalAdBanner';
 
 interface LeaderboardEntry {
   user_id: string;
@@ -179,8 +180,14 @@ export default function Leaderboard() {
     );
   };
 
+  const rightSidebar = (
+    <div className="space-y-4">
+      <VerticalAdBanner {...verticalAds[3]} />
+    </div>
+  );
+
   return (
-    <MainLayout>
+    <MainLayout rightSidebar={rightSidebar}>
       <div className="p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">

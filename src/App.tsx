@@ -16,6 +16,7 @@ import Notifications from "./pages/Notifications";
 import Ads from "./pages/Ads";
 import Admin from "./pages/Admin";
 import UserProfile from "./pages/UserProfile";
+import EStore from "./pages/EStore";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -47,6 +48,7 @@ const AppRoutes = () => {
       <Route path="/ads" element={<ProtectedRoute><Ads /></ProtectedRoute>} />
       <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
       <Route path="/user/:username" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
+      <Route path="/store" element={<ProtectedRoute><EStore /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

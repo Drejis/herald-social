@@ -22,6 +22,7 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { VerticalAdBanner, verticalAds } from '@/components/herald/VerticalAdBanner';
 
 interface WalletData {
   httn_points: number;
@@ -286,8 +287,14 @@ export default function Wallet() {
     ? (parseInt(convertAmount) / CONVERSION_RATE).toFixed(3)
     : '0.000';
 
+  const rightSidebar = (
+    <div className="space-y-4">
+      <VerticalAdBanner {...verticalAds[1]} />
+    </div>
+  );
+
   return (
-    <MainLayout>
+    <MainLayout rightSidebar={rightSidebar}>
       <div className="p-6 space-y-6">
         {/* Header */}
         <div>
