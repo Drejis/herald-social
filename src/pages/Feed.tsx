@@ -9,12 +9,17 @@ import { FloatingMessageButton } from '@/components/herald/FloatingMessageButton
 import { TrendingSection } from '@/components/herald/TrendingSection';
 import { RightSidebarWithAds } from '@/components/herald/RightSidebarWithAds';
 import { VerticalAdBanner, verticalAds } from '@/components/herald/VerticalAdBanner';
+import { PullToRefresh } from '@/components/herald/PullToRefresh';
+import { SearchBar } from '@/components/herald/SearchBar';
+import { LiveSection } from '@/components/herald/LiveSection';
+import { NewsSection } from '@/components/herald/NewsSection';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Sparkles, Image, Smile, Calendar, MapPin, BadgeCheck, Loader2, RefreshCw } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useRealTimeNotifications } from '@/hooks/useRealTimeNotifications';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface WalletBalance {
   httn_points: number;
@@ -112,6 +117,7 @@ const dummyPosts = [
 export default function Feed() {
   const { user } = useAuth();
   const { createNotification } = useRealTimeNotifications();
+  const isMobile = useIsMobile();
   const [wallet, setWallet] = useState<WalletBalance | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [tasks, setTasks] = useState<UserTask[]>([]);
@@ -357,9 +363,16 @@ export default function Feed() {
     completed: t.completed,
   }));
 
+  const handlePullRefresh = async () => {
+    await fetchPosts();
+    await fetchUserData();
+  };
+
   const rightSidebar = (
     <RightSidebarWithAds>
       <WalletPreview balance={walletBalance} />
+      <LiveSection compact />
+      <NewsSection compact />
       <TrendingSection />
       <TasksPanel tasks={formattedTasks} onClaim={handleClaimTask} />
       
@@ -394,6 +407,143 @@ export default function Feed() {
         </div>
       </div>
     </RightSidebarWithAds>
+  );
+
+  const feedContent = (
+    <>
+      {/* Header with Search */}
+      <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-lg border-b border-border">
+        <div className="px-4 py-3 space-y-3">
+          <div className="flex items-center justify-between">
+            <h1 className="font-display font-bold text-xl text-foreground">Home</h1>
+          </div>
+          <SearchBar />
+        </div>
+      </header>
+
+      {/* Compose Box */}
+      <div className="border-b border-border p-4">
+        <div className="flex gap-3">
+          <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center font-display font-bold text-foreground flex-shrink-0">
+            {profile?.display_name?.[0] || '?'}
+          </div>
+          <div className="flex-1">
+            <Textarea
+              placeholder="What's happening?"
+              value={postContent}
+              onChange={(e) => setPostContent(e.target.value)}
+              className="min-h-[80px] border-none bg-transparent resize-none text-lg placeholder:text-muted-foreground focus-visible:ring-0 p-0"
+            />
+            <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="icon" className="text-primary hover:bg-primary/10 rounded-full">
+                  <Image className="w-5 h-5" />
+                </Button>
+                <Button variant="ghost" size="icon" className="text-primary hover:bg-primary/10 rounded-full">
+                  <Smile className="w-5 h-5" />
+                </Button>
+                <Button variant="ghost" size="icon" className="text-primary hover:bg-primary/10 rounded-full" onClick={() => setScheduleDialogOpen(true)}>
+                  <Calendar className="w-5 h-5" />
+                </Button>
+                <Button variant="ghost" size="icon" className="text-primary hover:bg-primary/10 rounded-full">
+                  <MapPin className="w-5 h-5" />
+                </Button>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Sparkles className="w-3 h-3 text-primary" />
+                  +25 HTTN
+                </span>
+                <Button 
+                  variant="gold" 
+                  className="rounded-full font-semibold"
+                  onClick={handleQuickPost}
+                  disabled={!postContent.trim() || isPosting}
+                >
+                  {isPosting ? 'Posting...' : 'Post'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* New posts notification */}
+      {newPostsAvailable > 0 && (
+        <button
+          onClick={loadNewPosts}
+          className="w-full py-3 bg-primary/10 text-primary text-sm font-medium border-b border-border hover:bg-primary/20 transition-colors flex items-center justify-center gap-2"
+        >
+          <RefreshCw className="w-4 h-4" />
+          Show {newPostsAvailable} new post{newPostsAvailable > 1 ? 's' : ''}
+        </button>
+      )}
+
+      {/* Feed */}
+      <div>
+        {dummyPosts.map((post, index) => (
+          <div key={post.id}>
+            <TwitterStylePost
+              id={post.id}
+              author={post.author}
+              content={post.content}
+              likes={post.likes}
+              comments={post.comments}
+              reposts={post.reposts}
+              httnEarned={post.httnEarned}
+              createdAt={post.createdAt}
+              onLike={handleLike}
+              onRepost={handleRepost}
+            />
+            {index === 1 && (
+              <div className="px-4 py-3 border-b border-border">
+                <VerticalAdBanner {...verticalAds[0]} />
+              </div>
+            )}
+          </div>
+        ))}
+
+        {posts.map((post, index) => (
+          <div key={post.id}>
+            <TwitterStylePost
+              id={post.id}
+              author={{
+                id: post.author_id,
+                displayName: post.author?.display_name || 'Unknown',
+                username: post.author?.username || 'unknown',
+                avatar: post.author?.avatar_url,
+                isGoldVerified: post.author?.is_verified && post.author?.is_creator,
+                isVerified: post.author?.is_verified || false,
+              }}
+              content={post.content}
+              mediaUrl={post.media_url}
+              mediaType={post.media_type}
+              likes={post.likes_count}
+              comments={post.comments_count}
+              reposts={post.shares_count}
+              httnEarned={post.httn_earned}
+              createdAt={new Date(post.created_at)}
+              onLike={handleLike}
+              onRepost={handleRepost}
+            />
+          </div>
+        ))}
+
+        <div ref={loadMoreRef} className="py-8 flex justify-center">
+          {isLoadingMore ? (
+            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+          ) : hasMore ? (
+            <span className="text-sm text-muted-foreground">Scroll for more</span>
+          ) : (
+            <span className="text-sm text-muted-foreground">You're all caught up!</span>
+          )}
+        </div>
+      </div>
+
+      <CreatePostDialog open={createDialogOpen} onOpenChange={setCreateDialogOpen} />
+      <SchedulePostDialog open={scheduleDialogOpen} onOpenChange={setScheduleDialogOpen} />
+      <FloatingMessageButton />
+    </>
   );
 
   return (

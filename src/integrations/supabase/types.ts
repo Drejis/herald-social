@@ -179,6 +179,51 @@ export type Database = {
         }
         Relationships: []
       }
+      live_streams: {
+        Row: {
+          created_at: string
+          description: string | null
+          ended_at: string | null
+          id: string
+          scheduled_for: string | null
+          started_at: string | null
+          status: string
+          stream_url: string | null
+          thumbnail_url: string | null
+          title: string
+          user_id: string
+          viewer_count: number | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          ended_at?: string | null
+          id?: string
+          scheduled_for?: string | null
+          started_at?: string | null
+          status?: string
+          stream_url?: string | null
+          thumbnail_url?: string | null
+          title: string
+          user_id: string
+          viewer_count?: number | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          ended_at?: string | null
+          id?: string
+          scheduled_for?: string | null
+          started_at?: string | null
+          status?: string
+          stream_url?: string | null
+          thumbnail_url?: string | null
+          title?: string
+          user_id?: string
+          viewer_count?: number | null
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           content: string
@@ -203,6 +248,45 @@ export type Database = {
           read?: boolean
           receiver_id?: string
           sender_id?: string
+        }
+        Relationships: []
+      }
+      news_articles: {
+        Row: {
+          content: string | null
+          created_at: string
+          external_url: string | null
+          id: string
+          image_url: string | null
+          published_at: string
+          source: string
+          source_type: string
+          summary: string | null
+          title: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          external_url?: string | null
+          id?: string
+          image_url?: string | null
+          published_at?: string
+          source: string
+          source_type: string
+          summary?: string | null
+          title: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          external_url?: string | null
+          id?: string
+          image_url?: string | null
+          published_at?: string
+          source?: string
+          source_type?: string
+          summary?: string | null
+          title?: string
         }
         Relationships: []
       }
@@ -250,6 +334,39 @@ export type Database = {
           reference_type?: string | null
           title?: string
           type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      orders: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          items: Json
+          payment_type: string
+          status: string
+          total_amount: number
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          items?: Json
+          payment_type: string
+          status?: string
+          total_amount: number
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          items?: Json
+          payment_type?: string
+          status?: string
+          total_amount?: number
           user_id?: string
         }
         Relationships: []
@@ -444,6 +561,33 @@ export type Database = {
           event_type?: string
           id?: string
           session_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_interests: {
+        Row: {
+          created_at: string
+          id: string
+          interests: string[] | null
+          onboarding_completed: boolean | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          interests?: string[] | null
+          onboarding_completed?: boolean | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          interests?: string[] | null
+          onboarding_completed?: boolean | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
