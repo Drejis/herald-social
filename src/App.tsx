@@ -1,9 +1,14 @@
+import { useState, useEffect } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
+import { SplashScreen } from "@/components/herald/SplashScreen";
+import { OnboardingFlow } from "@/components/herald/OnboardingFlow";
+import { supabase } from "@/integrations/supabase/client";
+import { AnimatePresence } from "framer-motion";
 import Auth from "./pages/Auth";
 import Feed from "./pages/Feed";
 import Dashboard from "./pages/Dashboard";
@@ -18,25 +23,110 @@ import Admin from "./pages/Admin";
 import UserProfile from "./pages/UserProfile";
 import EStore from "./pages/EStore";
 import NotFound from "./pages/NotFound";
+import Index from "./pages/Index";
 
 const queryClient = new QueryClient();
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
-  if (loading) return <div className="min-h-screen bg-background" />;
-  if (!user) return <Navigate to="/auth" replace />;
+  const [showSplash, setShowSplash] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [checkingOnboarding, setCheckingOnboarding] = useState(true);
+
+  useEffect(() => {
+    // Show splash screen for 2 seconds minimum
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    const checkOnboarding = async () => {
+      if (user && !loading) {
+        const { data } = await supabase
+          .from('user_interests')
+          .select('onboarding_completed')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (!data || !data.onboarding_completed) {
+          setShowOnboarding(true);
+        }
+        setCheckingOnboarding(false);
+      } else if (!loading) {
+        setCheckingOnboarding(false);
+      }
+    };
+
+    checkOnboarding();
+  }, [user, loading]);
+
+  // Show splash screen during loading or initial check
+  if (loading || showSplash || checkingOnboarding) {
+    return (
+      <AnimatePresence mode="wait">
+        <SplashScreen key="splash" />
+      </AnimatePresence>
+    );
+  }
+
+  if (!user) return <Navigate to="/" replace />;
+
+  // Show onboarding for new users
+  if (showOnboarding) {
+    return (
+      <AnimatePresence mode="wait">
+        <OnboardingFlow 
+          key="onboarding"
+          onComplete={() => setShowOnboarding(false)} 
+        />
+      </AnimatePresence>
+    );
+  }
+
+  return <>{children}</>;
+}
+
+function AuthRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+  const [showSplash, setShowSplash] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading || showSplash) {
+    return (
+      <AnimatePresence mode="wait">
+        <SplashScreen key="splash-auth" />
+      </AnimatePresence>
+    );
+  }
+
+  if (user) return <Navigate to="/feed" replace />;
+  
   return <>{children}</>;
 }
 
 const AppRoutes = () => {
   const { user, loading } = useAuth();
   
-  if (loading) return <div className="min-h-screen bg-background" />;
+  if (loading) {
+    return (
+      <AnimatePresence mode="wait">
+        <SplashScreen key="splash-main" />
+      </AnimatePresence>
+    );
+  }
 
   return (
     <Routes>
-      <Route path="/auth" element={user ? <Navigate to="/feed" replace /> : <Auth />} />
-      <Route path="/" element={<Navigate to={user ? "/feed" : "/auth"} replace />} />
+      <Route path="/" element={user ? <Navigate to="/feed" replace /> : <Index />} />
+      <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
       <Route path="/feed" element={<ProtectedRoute><Feed /></ProtectedRoute>} />
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/explore" element={<ProtectedRoute><Explore /></ProtectedRoute>} />

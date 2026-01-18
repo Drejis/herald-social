@@ -1,203 +1,419 @@
-import { useState } from 'react';
-import { MainLayout } from '@/components/herald/MainLayout';
-import { PostCard } from '@/components/herald/PostCard';
-import { WalletPreview } from '@/components/herald/WalletPreview';
-import { TasksPanel } from '@/components/herald/TasksPanel';
-import { mockPosts, mockTasks, walletBalance, currentUser, mockUsers } from '@/data/mockData';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Sparkles, PenSquare, TrendingUp, ArrowUpRight } from 'lucide-react';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Sparkles, Heart, MessageCircle, Repeat2, Share, BadgeCheck, Lock, ArrowRight, Users, Wallet, Zap } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import heroBg from '@/assets/herald-hero-bg.jpg';
 
-const Index = () => {
-  const [posts, setPosts] = useState(mockPosts);
-  const [tasks, setTasks] = useState(mockTasks);
+// Dummy posts for the preview feed
+const previewPosts = [
+  {
+    id: 'p1',
+    author: { name: 'Herald Official', username: 'herald', verified: true, avatar: 'H' },
+    content: '🚀 Just launched our community impact report! This quarter we helped 500+ creators earn their first HTTN tokens. The future of creator economy is here.',
+    likes: 1234,
+    comments: 89,
+    reposts: 234,
+    httn: 450,
+    time: '2h',
+  },
+  {
+    id: 'p2',
+    author: { name: 'Sarah Chen', username: 'sarahcreates', verified: true, avatar: 'S' },
+    content: 'Every contribution matters. Every voice counts. Today I learned that my small daily actions have compounded into real impact. Thank you, Herald community. 💛',
+    likes: 567,
+    comments: 45,
+    reposts: 123,
+    httn: 320,
+    time: '4h',
+  },
+  {
+    id: 'p3',
+    author: { name: 'Alex Rivera', username: 'alexr', verified: true, avatar: 'A' },
+    content: 'Web3 isn\'t about speculation. It\'s about ownership. It\'s about creators finally getting what they deserve. Herald gets it. 🙌',
+    likes: 892,
+    comments: 67,
+    reposts: 189,
+    httn: 560,
+    time: '6h',
+  },
+  {
+    id: 'p4',
+    author: { name: 'Jordan Taylor', username: 'jtaylor', verified: false, avatar: 'J' },
+    content: 'Completed my weekly tasks and got bonus tokens! Who else is grinding? 💪 #HTTNRewards',
+    likes: 156,
+    comments: 18,
+    reposts: 12,
+    httn: 80,
+    time: '8h',
+  },
+];
 
-  const handleLike = (postId: string) => {
-    console.log('Liked post:', postId);
-  };
+const features = [
+  { icon: Wallet, title: 'Earn HTTN Tokens', description: 'Get rewarded for your engagement' },
+  { icon: Zap, title: 'Complete Tasks', description: 'Daily missions with real rewards' },
+  { icon: Users, title: 'Build Community', description: 'Connect with mission-aligned creators' },
+];
 
-  const handleShare = (postId: string) => {
-    console.log('Shared post:', postId);
-  };
+interface PreviewPostProps {
+  post: typeof previewPosts[0];
+  onInteract: () => void;
+}
 
-  const handleTip = (postId: string) => {
-    console.log('Tipped post:', postId);
-  };
-
-  const handleClaimTask = (taskId: string) => {
-    setTasks((prev) =>
-      prev.map((t) => (t.id === taskId ? { ...t, completed: true } : t))
-    );
-  };
-
-  const rightSidebar = (
-    <>
-      <WalletPreview balance={walletBalance} />
-      <TasksPanel tasks={tasks} onClaim={handleClaimTask} />
-      
-      {/* Top Creators */}
-      <div className="herald-card p-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <h3 className="font-display font-semibold text-foreground flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-primary" />
-            Top Creators
-          </h3>
-        </div>
-        <div className="space-y-3">
-          {mockUsers.slice(0, 3).map((user) => (
-            <div
-              key={user.id}
-              className="flex items-center justify-between p-2 rounded-lg hover:bg-secondary/50 transition-colors cursor-pointer"
-            >
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-sm font-display font-bold text-foreground">
-                  {user.displayName[0]}
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-foreground">
-                    {user.displayName}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {user.httnTokens.toFixed(0)} HTTN
-                  </p>
-                </div>
-              </div>
-              <Button variant="ghost" size="sm" className="text-xs">
-                Follow
-              </Button>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Value Flow Info */}
-      <div className="herald-card p-4 space-y-3 relative overflow-hidden">
-        <div 
-          className="absolute inset-0 opacity-20"
-          style={{
-            backgroundImage: `url(${heroBg})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
-        />
-        <div className="relative z-10">
-          <h3 className="font-display font-semibold text-foreground">How Value Flows</h3>
-          <div className="mt-3 space-y-2">
-            <div className="flex items-center gap-2 text-sm">
-              <span className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-xs text-primary">1</span>
-              <span className="text-muted-foreground">Create & Engage</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <span className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-xs text-primary">2</span>
-              <span className="text-muted-foreground">Earn HTTN Points</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <span className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-xs text-primary">3</span>
-              <span className="text-muted-foreground">Convert to Tokens</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <span className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-xs text-primary-foreground">4</span>
-              <span className="text-foreground font-medium">Redeem as Espees</span>
-            </div>
+function PreviewPost({ post, onInteract }: PreviewPostProps) {
+  return (
+    <div className="p-4 border-b border-border hover:bg-secondary/30 transition-colors">
+      <div className="flex gap-3">
+        <Avatar className="w-10 h-10">
+          <AvatarFallback className="bg-primary/20 text-primary font-display font-bold">
+            {post.author.avatar}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1 flex-wrap">
+            <span className="font-semibold text-foreground">{post.author.name}</span>
+            {post.author.verified && (
+              <BadgeCheck className="w-4 h-4 text-primary fill-primary/20" />
+            )}
+            <span className="text-muted-foreground text-sm">@{post.author.username}</span>
+            <span className="text-muted-foreground text-sm">·</span>
+            <span className="text-muted-foreground text-sm">{post.time}</span>
           </div>
-          <Button variant="gold-outline" size="sm" className="w-full mt-4 gap-1">
-            Learn More <ArrowUpRight className="w-3 h-3" />
-          </Button>
+          <p className="text-foreground mt-1 break-words">{post.content}</p>
+          
+          {/* Interaction buttons - locked */}
+          <div className="flex items-center justify-between mt-3 max-w-md">
+            <button 
+              onClick={onInteract}
+              className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors group"
+            >
+              <div className="p-2 rounded-full group-hover:bg-primary/10">
+                <MessageCircle className="w-4 h-4" />
+              </div>
+              <span className="text-sm">{post.comments}</span>
+            </button>
+            <button 
+              onClick={onInteract}
+              className="flex items-center gap-1 text-muted-foreground hover:text-green-500 transition-colors group"
+            >
+              <div className="p-2 rounded-full group-hover:bg-green-500/10">
+                <Repeat2 className="w-4 h-4" />
+              </div>
+              <span className="text-sm">{post.reposts}</span>
+            </button>
+            <button 
+              onClick={onInteract}
+              className="flex items-center gap-1 text-muted-foreground hover:text-red-500 transition-colors group"
+            >
+              <div className="p-2 rounded-full group-hover:bg-red-500/10">
+                <Heart className="w-4 h-4" />
+              </div>
+              <span className="text-sm">{post.likes}</span>
+            </button>
+            <button 
+              onClick={onInteract}
+              className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors group"
+            >
+              <div className="p-2 rounded-full group-hover:bg-primary/10">
+                <Share className="w-4 h-4" />
+              </div>
+            </button>
+          </div>
+
+          {/* HTTN earned badge */}
+          <div className="mt-2 inline-flex items-center gap-1 text-xs text-primary bg-primary/10 px-2 py-1 rounded-full">
+            <Sparkles className="w-3 h-3" />
+            <span>+{post.httn} HTTN</span>
+          </div>
         </div>
       </div>
-    </>
+    </div>
   );
+}
+
+export default function Index() {
+  const navigate = useNavigate();
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+
+  const handleInteract = () => {
+    setShowAuthPrompt(true);
+  };
+
+  const goToAuth = () => {
+    navigate('/auth');
+  };
 
   return (
-    <MainLayout rightSidebar={rightSidebar}>
-      {/* Header */}
-      <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-lg border-b border-border">
-        <div className="p-4 flex items-center justify-between">
-          <h1 className="font-display font-bold text-xl text-foreground">Feed</h1>
-          <Button variant="gold" size="sm" className="gap-2">
-            <PenSquare className="w-4 h-4" />
-            Create
+    <div className="min-h-screen bg-background">
+      {/* Auth Prompt Modal */}
+      <AnimatePresence>
+        {showAuthPrompt && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={() => setShowAuthPrompt(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="w-full max-w-md"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Hero section */}
+              <div className="relative rounded-2xl overflow-hidden">
+                <div 
+                  className="absolute inset-0"
+                  style={{
+                    backgroundImage: `url(${heroBg})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
+                
+                <div className="relative p-8 text-center space-y-6">
+                  <motion.div 
+                    className="w-16 h-16 mx-auto rounded-2xl bg-primary flex items-center justify-center gold-glow"
+                    animate={{ scale: [1, 1.05, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    <Sparkles className="w-8 h-8 text-primary-foreground" />
+                  </motion.div>
+
+                  <div>
+                    <h2 className="font-display text-3xl font-bold text-foreground mb-2">
+                      Join Herald
+                    </h2>
+                    <p className="text-muted-foreground">
+                      Where your <span className="gold-text font-semibold">attention</span> becomes <span className="gold-text font-semibold">value</span>
+                    </p>
+                  </div>
+
+                  <div className="space-y-3">
+                    {features.map((feature, i) => (
+                      <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-secondary/50">
+                        <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
+                          <feature.icon className="w-5 h-5 text-primary" />
+                        </div>
+                        <div className="text-left">
+                          <p className="font-semibold text-foreground text-sm">{feature.title}</p>
+                          <p className="text-xs text-muted-foreground">{feature.description}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-primary/10 border border-primary/20">
+                    <div className="flex items-center justify-center gap-2">
+                      <Sparkles className="w-5 h-5 text-primary" />
+                      <span className="font-display font-bold gold-text">100 HTTN Points</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">Welcome bonus on signup!</p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <Button variant="gold" className="w-full gap-2" onClick={goToAuth}>
+                      Create Account
+                      <ArrowRight className="w-4 h-4" />
+                    </Button>
+                    <Button variant="outline" className="w-full" onClick={goToAuth}>
+                      Sign In
+                    </Button>
+                  </div>
+
+                  <button 
+                    onClick={() => setShowAuthPrompt(false)}
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Continue browsing
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Main Layout */}
+      <div className="flex max-w-7xl mx-auto">
+        {/* Left sidebar - Desktop only */}
+        <aside className="hidden lg:block w-64 sticky top-0 h-screen border-r border-border p-4">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center gold-glow">
+              <Sparkles className="w-5 h-5 text-primary-foreground" />
+            </div>
+            <h1 className="font-display text-xl font-bold text-foreground">Herald</h1>
+          </div>
+
+          <nav className="space-y-2">
+            {['Home', 'Explore', 'Notifications', 'Messages', 'Profile', 'Wallet'].map((item, i) => (
+              <button
+                key={item}
+                onClick={i > 0 ? handleInteract : undefined}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
+                  i === 0 
+                    ? 'bg-secondary text-foreground font-semibold' 
+                    : 'text-muted-foreground hover:bg-secondary/50'
+                }`}
+              >
+                {item}
+                {i > 0 && <Lock className="w-3 h-3 ml-auto" />}
+              </button>
+            ))}
+          </nav>
+
+          <div className="mt-8">
+            <Button variant="gold" className="w-full rounded-full gap-2" onClick={handleInteract}>
+              <Lock className="w-4 h-4" />
+              Post
+            </Button>
+          </div>
+        </aside>
+
+        {/* Main feed */}
+        <main className="flex-1 min-w-0 border-r border-border">
+          {/* Header */}
+          <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-lg border-b border-border">
+            <div className="p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="lg:hidden w-8 h-8 rounded-xl bg-primary flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-primary-foreground" />
+                </div>
+                <h1 className="font-display font-bold text-xl text-foreground">Home</h1>
+              </div>
+              <Button variant="gold" size="sm" className="rounded-full gap-2" onClick={goToAuth}>
+                Sign Up
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </div>
+          </header>
+
+          {/* Locked compose box */}
+          <div 
+            className="border-b border-border p-4 cursor-pointer hover:bg-secondary/30 transition-colors"
+            onClick={handleInteract}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
+                <Lock className="w-4 h-4 text-muted-foreground" />
+              </div>
+              <div className="flex-1 py-3 px-4 rounded-full bg-secondary/50 text-muted-foreground">
+                Sign in to post...
+              </div>
+            </div>
+          </div>
+
+          {/* Preview Posts */}
+          <div>
+            {previewPosts.map((post) => (
+              <PreviewPost key={post.id} post={post} onInteract={handleInteract} />
+            ))}
+          </div>
+
+          {/* More content prompt */}
+          <div className="p-8 text-center border-t border-border">
+            <div className="max-w-sm mx-auto space-y-4">
+              <div className="w-12 h-12 mx-auto rounded-xl bg-secondary flex items-center justify-center">
+                <Lock className="w-6 h-6 text-muted-foreground" />
+              </div>
+              <h3 className="font-display font-semibold text-foreground">See more on Herald</h3>
+              <p className="text-sm text-muted-foreground">
+                Sign up to discover more content, follow creators, and start earning rewards.
+              </p>
+              <Button variant="gold" onClick={goToAuth} className="gap-2">
+                Get Started
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        </main>
+
+        {/* Right sidebar - Desktop only */}
+        <aside className="hidden xl:block w-80 sticky top-0 h-screen p-4">
+          <div className="space-y-4">
+            {/* Sign up card */}
+            <div className="herald-card p-4 space-y-3">
+              <h3 className="font-display font-semibold text-foreground">New to Herald?</h3>
+              <p className="text-sm text-muted-foreground">
+                Sign up now to earn rewards for your engagement.
+              </p>
+              <Button variant="gold" className="w-full gap-2" onClick={goToAuth}>
+                Create Account
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+              <Button variant="outline" className="w-full" onClick={goToAuth}>
+                Sign In
+              </Button>
+            </div>
+
+            {/* Trending */}
+            <div className="herald-card p-4 space-y-3">
+              <h3 className="font-display font-semibold text-foreground">Trending</h3>
+              <div className="space-y-3">
+                {['#HTTNRewards', '#Web3Social', '#CreatorEconomy', '#Herald'].map((tag) => (
+                  <div 
+                    key={tag}
+                    className="cursor-pointer hover:bg-secondary/50 p-2 rounded-lg transition-colors"
+                    onClick={handleInteract}
+                  >
+                    <p className="font-semibold text-foreground text-sm">{tag}</p>
+                    <p className="text-xs text-muted-foreground">Trending in Tech</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Who to follow */}
+            <div className="herald-card p-4 space-y-3">
+              <h3 className="font-display font-semibold text-foreground">Who to follow</h3>
+              <div className="space-y-3">
+                {[
+                  { name: 'Herald Official', username: 'herald' },
+                  { name: 'Sarah Chen', username: 'sarahcreates' },
+                  { name: 'Alex Rivera', username: 'alexr' },
+                ].map((user) => (
+                  <div key={user.username} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Avatar className="w-8 h-8">
+                        <AvatarFallback className="bg-primary/20 text-primary text-sm font-bold">
+                          {user.name[0]}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-sm font-semibold text-foreground flex items-center gap-1">
+                          {user.name}
+                          <BadgeCheck className="w-3 h-3 text-primary fill-primary/20" />
+                        </p>
+                        <p className="text-xs text-muted-foreground">@{user.username}</p>
+                      </div>
+                    </div>
+                    <Button variant="outline" size="sm" className="rounded-full" onClick={handleInteract}>
+                      Follow
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      {/* Mobile bottom bar */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur border-t border-border p-3">
+        <div className="flex items-center justify-center gap-3">
+          <Button variant="outline" className="flex-1" onClick={goToAuth}>
+            Sign In
+          </Button>
+          <Button variant="gold" className="flex-1 gap-2" onClick={goToAuth}>
+            Sign Up
+            <ArrowRight className="w-4 h-4" />
           </Button>
         </div>
-      </header>
-
-      {/* User welcome card */}
-      <div className="p-4 border-b border-border">
-        <div className="herald-card-elevated p-5 relative overflow-hidden">
-          <div 
-            className="absolute inset-0 opacity-30"
-            style={{
-              backgroundImage: `url(${heroBg})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-            }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/70 to-transparent" />
-          
-          <div className="relative z-10 flex items-center justify-between">
-            <div>
-              <p className="text-muted-foreground text-sm">Welcome back,</p>
-              <h2 className="font-display font-bold text-2xl text-foreground">
-                {currentUser.displayName}
-              </h2>
-            </div>
-            <div className="text-right">
-              <div className="flex items-center gap-1.5 justify-end">
-                <Sparkles className="w-4 h-4 text-primary glow-gold-sm" />
-                <span className="font-display font-bold text-xl gold-text">
-                  {walletBalance.httnPoints.toLocaleString()}
-                </span>
-              </div>
-              <p className="text-xs text-muted-foreground">HTTN Points</p>
-            </div>
-          </div>
-
-          {/* Quick stats */}
-          <div className="relative z-10 grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-border/50">
-            <div className="text-center">
-              <p className="font-display font-semibold text-lg text-foreground">
-                {currentUser.httnTokens.toFixed(1)}
-              </p>
-              <p className="text-xs text-muted-foreground">Tokens</p>
-            </div>
-            <div className="text-center">
-              <p className="font-display font-semibold text-lg gold-text">
-                {currentUser.reputation}
-              </p>
-              <p className="text-xs text-muted-foreground">Reputation</p>
-            </div>
-            <div className="text-center">
-              <p className="font-display font-semibold text-lg text-foreground">
-                {tasks.filter((t) => !t.completed).length}
-              </p>
-              <p className="text-xs text-muted-foreground">Tasks</p>
-            </div>
-          </div>
-        </div>
       </div>
-
-      {/* Feed */}
-      <div className="divide-y divide-border">
-        {posts.map((post) => (
-          <div key={post.id} className="p-4">
-            <PostCard
-              post={post}
-              onLike={handleLike}
-              onShare={handleShare}
-              onTip={handleTip}
-            />
-          </div>
-        ))}
-      </div>
-
-      {/* Load more */}
-      <div className="p-8 text-center">
-        <Button variant="outline" className="gap-2">
-          Load more posts
-        </Button>
-      </div>
-    </MainLayout>
+    </div>
   );
-};
-
-export default Index;
+}
