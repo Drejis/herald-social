@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -49,6 +50,7 @@ interface LiveSectionProps {
 }
 
 export function LiveSection({ compact = false }: LiveSectionProps) {
+  const navigate = useNavigate();
   const [streams, setStreams] = useState<LiveStream[]>(DEMO_STREAMS);
 
   if (compact) {
@@ -88,7 +90,7 @@ export function LiveSection({ compact = false }: LiveSectionProps) {
               </div>
             </div>
           ))}
-          <Button variant="ghost" size="sm" className="w-full text-primary">
+          <Button variant="ghost" size="sm" className="w-full text-primary" onClick={() => navigate('/live')}>
             See all live streams
           </Button>
         </CardContent>

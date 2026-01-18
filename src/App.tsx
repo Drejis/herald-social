@@ -24,6 +24,7 @@ import UserProfile from "./pages/UserProfile";
 import EStore from "./pages/EStore";
 import NotFound from "./pages/NotFound";
 import Index from "./pages/Index";
+import Live from "./pages/Live";
 
 const queryClient = new QueryClient();
 
@@ -139,6 +140,8 @@ const AppRoutes = () => {
       <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
       <Route path="/user/:username" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
       <Route path="/store" element={<ProtectedRoute><EStore /></ProtectedRoute>} />
+      <Route path="/live" element={<ProtectedRoute><Live /></ProtectedRoute>} />
+      <Route path="*" element={<NotFound />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

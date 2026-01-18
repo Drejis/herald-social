@@ -179,6 +179,38 @@ export type Database = {
         }
         Relationships: []
       }
+      live_chat_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          stream_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          stream_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          stream_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_chat_messages_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: false
+            referencedRelation: "live_streams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       live_streams: {
         Row: {
           created_at: string
@@ -537,6 +569,41 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      stream_donations: {
+        Row: {
+          amount: number
+          created_at: string
+          donor_id: string
+          id: string
+          message: string | null
+          stream_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          donor_id: string
+          id?: string
+          message?: string | null
+          stream_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          donor_id?: string
+          id?: string
+          message?: string | null
+          stream_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stream_donations_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: false
+            referencedRelation: "live_streams"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_analytics: {
         Row: {
