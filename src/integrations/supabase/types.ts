@@ -65,6 +65,89 @@ export type Database = {
         }
         Relationships: []
       }
+      cause_donations: {
+        Row: {
+          amount: number
+          anonymous: boolean | null
+          cause_id: string
+          created_at: string
+          donor_id: string
+          id: string
+          message: string | null
+        }
+        Insert: {
+          amount: number
+          anonymous?: boolean | null
+          cause_id: string
+          created_at?: string
+          donor_id: string
+          id?: string
+          message?: string | null
+        }
+        Update: {
+          amount?: number
+          anonymous?: boolean | null
+          cause_id?: string
+          created_at?: string
+          donor_id?: string
+          id?: string
+          message?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cause_donations_cause_id_fkey"
+            columns: ["cause_id"]
+            isOneToOne: false
+            referencedRelation: "causes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      causes: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string
+          description: string
+          end_date: string | null
+          goal_amount: number
+          id: string
+          image_url: string | null
+          raised_amount: number | null
+          status: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          created_by: string
+          description: string
+          end_date?: string | null
+          goal_amount?: number
+          id?: string
+          image_url?: string | null
+          raised_amount?: number | null
+          status?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string
+          description?: string
+          end_date?: string | null
+          goal_amount?: number
+          id?: string
+          image_url?: string | null
+          raised_amount?: number | null
+          status?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           author_id: string
@@ -106,6 +189,77 @@ export type Database = {
             columns: ["post_id"]
             isOneToOne: false
             referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      communities: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          image_url: string | null
+          is_private: boolean | null
+          member_count: number | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_private?: boolean | null
+          member_count?: number | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_private?: boolean | null
+          member_count?: number | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      community_members: {
+        Row: {
+          community_id: string
+          id: string
+          joined_at: string
+          role: string | null
+          user_id: string
+        }
+        Insert: {
+          community_id: string
+          id?: string
+          joined_at?: string
+          role?: string | null
+          user_id: string
+        }
+        Update: {
+          community_id?: string
+          id?: string
+          joined_at?: string
+          role?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_members_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
             referencedColumns: ["id"]
           },
         ]
@@ -479,8 +633,10 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_type: string | null
           avatar_url: string | null
           bio: string | null
+          business_category: string | null
           created_at: string
           display_name: string | null
           followers_count: number | null
@@ -488,6 +644,7 @@ export type Database = {
           id: string
           is_creator: boolean | null
           is_verified: boolean | null
+          organization_name: string | null
           reputation: number | null
           tier: string | null
           total_engagement: number | null
@@ -497,8 +654,10 @@ export type Database = {
           verification_points_threshold: number | null
         }
         Insert: {
+          account_type?: string | null
           avatar_url?: string | null
           bio?: string | null
+          business_category?: string | null
           created_at?: string
           display_name?: string | null
           followers_count?: number | null
@@ -506,6 +665,7 @@ export type Database = {
           id?: string
           is_creator?: boolean | null
           is_verified?: boolean | null
+          organization_name?: string | null
           reputation?: number | null
           tier?: string | null
           total_engagement?: number | null
@@ -515,8 +675,10 @@ export type Database = {
           verification_points_threshold?: number | null
         }
         Update: {
+          account_type?: string | null
           avatar_url?: string | null
           bio?: string | null
+          business_category?: string | null
           created_at?: string
           display_name?: string | null
           followers_count?: number | null
@@ -524,6 +686,7 @@ export type Database = {
           id?: string
           is_creator?: boolean | null
           is_verified?: boolean | null
+          organization_name?: string | null
           reputation?: number | null
           tier?: string | null
           total_engagement?: number | null
