@@ -5,7 +5,6 @@ import {
   User,
   Settings,
   Sparkles,
-  TrendingUp,
   LayoutDashboard,
   Wallet,
   LogOut,
@@ -13,6 +12,9 @@ import {
   Megaphone,
   Users,
   Store,
+  Radio,
+  Newspaper,
+  HandHeart,
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/hooks/useAuth';
@@ -31,15 +33,18 @@ export function AppSidebar() {
 
   const navItems = [
     { icon: Home, label: 'Home', path: '/feed' },
+    { icon: Radio, label: 'Herald Live', path: '/live' },
+    { icon: Megaphone, label: 'Herald Promote', path: '/ads' },
+    { icon: Users, label: 'Herald Communities', path: '/communities' },
+    { icon: Newspaper, label: 'Herald News', path: '/news' },
+    { icon: Store, label: 'Herald Commerce', path: '/store' },
+    { icon: HandHeart, label: 'Herald Causes', path: '/causes' },
     { icon: Search, label: 'Explore', path: '/explore' },
     { icon: Bell, label: 'Notifications', path: '/notifications' },
-    { icon: Users, label: 'Communities', path: '/explore?tab=community' },
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
     { icon: Wallet, label: 'Wallet', path: '/wallet' },
     { icon: Trophy, label: 'Leaderboard', path: '/leaderboard' },
-    { icon: Megaphone, label: 'Ads', path: '/ads' },
     { icon: User, label: 'Profile', path: '/profile' },
-    { icon: Store, label: 'E-Store', path: '/store' },
   ];
 
   return (

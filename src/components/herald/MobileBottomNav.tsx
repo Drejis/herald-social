@@ -1,14 +1,14 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Compass, Bell, Mail, User } from 'lucide-react';
+import { Home, Radio, Users, Bell, User } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 const navItems = [
   { icon: Home, label: 'Home', path: '/feed' },
-  { icon: Compass, label: 'Explore', path: '/explore' },
-  { icon: Bell, label: 'Notifications', path: '/notifications' },
-  { icon: Mail, label: 'Messages', path: '/dashboard' },
+  { icon: Radio, label: 'Live', path: '/live' },
+  { icon: Users, label: 'Community', path: '/communities' },
+  { icon: Bell, label: 'Alerts', path: '/notifications' },
   { icon: User, label: 'Profile', path: '/profile' },
 ];
 
