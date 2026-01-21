@@ -22,6 +22,9 @@ import {
   MapPin,
   Link as LinkIcon,
   ArrowLeft,
+  Building2,
+  Church,
+  Briefcase,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -29,6 +32,8 @@ import { useToast } from '@/hooks/use-toast';
 import { AvatarUpload } from '@/components/herald/AvatarUpload';
 import { useNavigate } from 'react-router-dom';
 import { VerticalAdBanner, verticalAds } from '@/components/herald/VerticalAdBanner';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 
 interface ProfileData {
   id: string;
@@ -45,6 +50,9 @@ interface ProfileData {
   followers_count: number;
   following_count: number;
   created_at: string;
+  account_type: string | null;
+  organization_name: string | null;
+  business_category: string | null;
 }
 
 interface WalletData {
@@ -76,6 +84,9 @@ export default function Profile() {
     display_name: '',
     username: '',
     bio: '',
+    account_type: 'normal',
+    organization_name: '',
+    business_category: '',
   });
 
   const VERIFICATION_THRESHOLD = 10000;
@@ -102,6 +113,9 @@ export default function Profile() {
         display_name: profileRes.data.display_name || '',
         username: profileRes.data.username || '',
         bio: profileRes.data.bio || '',
+        account_type: profileRes.data.account_type || 'normal',
+        organization_name: profileRes.data.organization_name || '',
+        business_category: profileRes.data.business_category || '',
       });
     }
     if (walletRes.data) setWallet(walletRes.data);
@@ -117,6 +131,9 @@ export default function Profile() {
         display_name: editForm.display_name,
         username: editForm.username,
         bio: editForm.bio,
+        account_type: editForm.account_type,
+        organization_name: editForm.account_type !== 'normal' ? editForm.organization_name : null,
+        business_category: editForm.account_type === 'business' ? editForm.business_category : null,
       })
       .eq('user_id', user.id);
 
@@ -251,18 +268,97 @@ export default function Profile() {
           {/* Name & Handle */}
           <div className="mb-3">
             {isEditing ? (
-              <div className="space-y-2">
-                <Input
-                  value={editForm.display_name}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, display_name: e.target.value }))}
-                  placeholder="Display name"
-                  className="text-xl font-display font-bold"
-                />
-                <Input
-                  value={editForm.username}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, username: e.target.value }))}
-                  placeholder="@username"
-                />
+              <div className="space-y-3">
+                <div>
+                  <Label className="text-xs text-muted-foreground mb-1">Display Name</Label>
+                  <Input
+                    value={editForm.display_name}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, display_name: e.target.value }))}
+                    placeholder="Display name"
+                    className="text-xl font-display font-bold"
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground mb-1">Username</Label>
+                  <Input
+                    value={editForm.username}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, username: e.target.value }))}
+                    placeholder="@username"
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground mb-1">Account Type</Label>
+                  <Select
+                    value={editForm.account_type}
+                    onValueChange={(value) => setEditForm(prev => ({ ...prev, account_type: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select account type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="normal">
+                        <div className="flex items-center gap-2">
+                          <Building2 className="w-4 h-4" />
+                          Normal Account
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="church">
+                        <div className="flex items-center gap-2">
+                          <Church className="w-4 h-4" />
+                          Church / Group
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="business">
+                        <div className="flex items-center gap-2">
+                          <Briefcase className="w-4 h-4" />
+                          Business Account
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Organization Name - shown for Church and Business */}
+                {(editForm.account_type === 'church' || editForm.account_type === 'business') && (
+                  <div>
+                    <Label className="text-xs text-muted-foreground mb-1">
+                      {editForm.account_type === 'church' ? 'Organization / Ministry Name' : 'Business Name'}
+                    </Label>
+                    <Input
+                      value={editForm.organization_name}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, organization_name: e.target.value }))}
+                      placeholder={editForm.account_type === 'church' ? 'Enter church or organization name' : 'Enter business name'}
+                    />
+                  </div>
+                )}
+
+                {/* Business Category - shown only for Business */}
+                {editForm.account_type === 'business' && (
+                  <div>
+                    <Label className="text-xs text-muted-foreground mb-1">Business Category</Label>
+                    <Select
+                      value={editForm.business_category}
+                      onValueChange={(value) => setEditForm(prev => ({ ...prev, business_category: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select business category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="retail">Retail & E-commerce</SelectItem>
+                        <SelectItem value="technology">Technology</SelectItem>
+                        <SelectItem value="finance">Finance & Banking</SelectItem>
+                        <SelectItem value="healthcare">Healthcare</SelectItem>
+                        <SelectItem value="education">Education</SelectItem>
+                        <SelectItem value="entertainment">Entertainment & Media</SelectItem>
+                        <SelectItem value="hospitality">Hospitality & Tourism</SelectItem>
+                        <SelectItem value="real_estate">Real Estate</SelectItem>
+                        <SelectItem value="consulting">Consulting & Services</SelectItem>
+                        <SelectItem value="nonprofit">Non-Profit</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               </div>
             ) : (
               <>
@@ -278,6 +374,31 @@ export default function Profile() {
                   )}
                 </div>
                 <p className="text-muted-foreground">@{profile?.username || 'username'}</p>
+                
+                {/* Show account type badge and org info */}
+                {profile?.account_type && profile.account_type !== 'normal' && (
+                  <div className="flex flex-wrap items-center gap-2 mt-2">
+                    <Badge variant="outline" className="flex items-center gap-1">
+                      {profile.account_type === 'church' ? (
+                        <Church className="w-3 h-3" />
+                      ) : (
+                        <Briefcase className="w-3 h-3" />
+                      )}
+                      {profile.account_type === 'church' ? 'Church / Group' : 'Business'}
+                    </Badge>
+                    {profile.organization_name && (
+                      <span className="text-sm text-muted-foreground flex items-center gap-1">
+                        <Building2 className="w-3 h-3" />
+                        {profile.organization_name}
+                      </span>
+                    )}
+                    {profile.business_category && (
+                      <Badge variant="secondary" className="text-xs">
+                        {profile.business_category.replace('_', ' ')}
+                      </Badge>
+                    )}
+                  </div>
+                )}
               </>
             )}
           </div>
