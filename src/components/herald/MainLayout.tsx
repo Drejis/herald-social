@@ -16,12 +16,16 @@ export function MainLayout({ children, rightSidebar, hideMobileNav = false }: Ma
     <div className="min-h-screen flex w-full bg-background">
       <AppSidebar />
       
-      <main className={`flex-1 max-w-2xl border-r border-border ${isMobile && !hideMobileNav ? 'pb-20' : ''}`}>
-        {children}
+      {/* Main content - centered with max-width for Twitter-like layout */}
+      <main className={`flex-1 min-w-0 border-x border-border ${isMobile ? 'pt-16 pb-20' : ''}`}>
+        <div className="max-w-2xl mx-auto">
+          {children}
+        </div>
       </main>
 
-      {rightSidebar && (
-        <aside className="w-80 h-screen sticky top-0 p-4 space-y-4 overflow-y-auto hidden lg:block scrollbar-none flex-shrink-0">
+      {/* Right sidebar - only on larger screens */}
+      {rightSidebar && !isMobile && (
+        <aside className="w-80 h-screen sticky top-0 p-4 space-y-4 overflow-y-auto hidden xl:block scrollbar-none flex-shrink-0">
           {rightSidebar}
         </aside>
       )}

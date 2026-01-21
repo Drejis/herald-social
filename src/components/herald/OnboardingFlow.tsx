@@ -1,9 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Sparkles, ArrowRight, Check, BadgeCheck } from 'lucide-react';
+import { Sparkles, ArrowRight, Check, BadgeCheck, User, Church, Briefcase } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -11,6 +10,27 @@ import { motion, AnimatePresence } from 'framer-motion';
 interface OnboardingFlowProps {
   onComplete: () => void;
 }
+
+const ACCOUNT_TYPES = [
+  { 
+    id: 'normal', 
+    label: 'Normal Account', 
+    description: 'Personal account for individual users',
+    icon: User 
+  },
+  { 
+    id: 'church', 
+    label: 'Church / Group', 
+    description: 'For churches, ministries, and organizations',
+    icon: Church 
+  },
+  { 
+    id: 'business', 
+    label: 'Business Account', 
+    description: 'For businesses and commercial entities',
+    icon: Briefcase 
+  },
+];
 
 const INTERESTS = [
   { id: 'crypto', label: '🪙 Crypto & Web3', icon: '🪙' },
@@ -38,6 +58,7 @@ const SUGGESTED_USERS = [
 export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const { user } = useAuth();
   const [step, setStep] = useState(1);
+  const [selectedAccountType, setSelectedAccountType] = useState<string>('normal');
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [followedUsers, setFollowedUsers] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -61,6 +82,11 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     
     setIsLoading(true);
     
+    // Save account type to profile
+    await supabase.from('profiles').update({
+      account_type: selectedAccountType,
+    }).eq('user_id', user.id);
+
     // Save interests
     await supabase.from('user_interests').upsert({
       user_id: user.id,
@@ -72,7 +98,8 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     onComplete();
   };
 
-  const canProceed = step === 1 ? selectedInterests.length >= 1 : step === 2 ? true : true;
+  const canProceed = step === 1 ? selectedAccountType : step === 2 ? selectedInterests.length >= 1 : true;
+  const totalSteps = 4;
 
   return (
     <motion.div 
@@ -84,7 +111,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         <CardContent className="p-6">
           {/* Progress indicator */}
           <div className="flex items-center gap-2 mb-6">
-            {[1, 2, 3].map((s) => (
+            {[1, 2, 3, 4].map((s) => (
               <div 
                 key={s} 
                 className={`flex-1 h-1 rounded-full transition-colors ${
@@ -95,10 +122,59 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           </div>
 
           <AnimatePresence mode="wait">
-            {/* Step 1: Interests */}
+            {/* Step 1: Account Type Selection */}
             {step === 1 && (
               <motion.div
                 key="step1"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-4"
+              >
+                <div className="text-center">
+                  <h2 className="font-display text-2xl font-bold text-foreground">Choose your account type</h2>
+                  <p className="text-muted-foreground text-sm mt-1">Select the type that best describes you</p>
+                </div>
+
+                <div className="space-y-3 py-4">
+                  {ACCOUNT_TYPES.map((type) => {
+                    const Icon = type.icon;
+                    const isSelected = selectedAccountType === type.id;
+                    return (
+                      <button
+                        key={type.id}
+                        onClick={() => setSelectedAccountType(type.id)}
+                        className={`w-full flex items-center gap-4 p-4 rounded-xl border transition-all ${
+                          isSelected
+                            ? 'bg-primary/10 border-primary'
+                            : 'bg-secondary/50 border-border hover:border-primary/50'
+                        }`}
+                      >
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                          isSelected ? 'bg-primary text-primary-foreground' : 'bg-secondary text-foreground'
+                        }`}>
+                          <Icon className="w-6 h-6" />
+                        </div>
+                        <div className="flex-1 text-left">
+                          <p className={`font-semibold ${isSelected ? 'text-primary' : 'text-foreground'}`}>
+                            {type.label}
+                          </p>
+                          <p className="text-xs text-muted-foreground">{type.description}</p>
+                        </div>
+                        {isSelected && (
+                          <Check className="w-5 h-5 text-primary" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Step 2: Interests */}
+            {step === 2 && (
+              <motion.div
+                key="step2"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
@@ -131,10 +207,10 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
               </motion.div>
             )}
 
-            {/* Step 2: Suggested users */}
-            {step === 2 && (
+            {/* Step 3: Suggested users */}
+            {step === 3 && (
               <motion.div
-                key="step2"
+                key="step3"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
@@ -146,35 +222,35 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                 </div>
 
                 <div className="space-y-3 py-4 max-h-[300px] overflow-y-auto">
-                  {SUGGESTED_USERS.map((user) => (
+                  {SUGGESTED_USERS.map((suggestedUser) => (
                     <div 
-                      key={user.id}
+                      key={suggestedUser.id}
                       className="flex items-center justify-between p-3 rounded-xl bg-secondary/50"
                     >
                       <div className="flex items-center gap-3">
                         <Avatar className="w-12 h-12">
-                          <AvatarImage src={user.avatar || undefined} />
+                          <AvatarImage src={suggestedUser.avatar || undefined} />
                           <AvatarFallback className="bg-primary/20 text-primary font-display font-bold">
-                            {user.name[0]}
+                            {suggestedUser.name[0]}
                           </AvatarFallback>
                         </Avatar>
                         <div>
                           <p className="font-semibold text-foreground flex items-center gap-1">
-                            {user.name}
-                            {user.verified && (
+                            {suggestedUser.name}
+                            {suggestedUser.verified && (
                               <BadgeCheck className="w-4 h-4 text-primary fill-primary/20" />
                             )}
                           </p>
-                          <p className="text-xs text-muted-foreground">@{user.username}</p>
+                          <p className="text-xs text-muted-foreground">@{suggestedUser.username}</p>
                         </div>
                       </div>
                       <Button
                         size="sm"
-                        variant={followedUsers.includes(user.id) ? 'outline' : 'gold'}
-                        onClick={() => toggleFollow(user.id)}
+                        variant={followedUsers.includes(suggestedUser.id) ? 'outline' : 'gold'}
+                        onClick={() => toggleFollow(suggestedUser.id)}
                         className="rounded-full"
                       >
-                        {followedUsers.includes(user.id) ? (
+                        {followedUsers.includes(suggestedUser.id) ? (
                           <>
                             <Check className="w-4 h-4 mr-1" />
                             Following
@@ -189,10 +265,10 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
               </motion.div>
             )}
 
-            {/* Step 3: Welcome */}
-            {step === 3 && (
+            {/* Step 4: Welcome */}
+            {step === 4 && (
               <motion.div
-                key="step3"
+                key="step4"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
@@ -227,7 +303,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
           {/* Navigation */}
           <div className="flex gap-3 mt-6">
-            {step > 1 && step < 3 && (
+            {step > 1 && step < totalSteps && (
               <Button 
                 variant="outline" 
                 onClick={() => setStep(s => s - 1)}
@@ -238,16 +314,16 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             )}
             <Button 
               variant="gold" 
-              onClick={() => step < 3 ? setStep(s => s + 1) : handleComplete()}
+              onClick={() => step < totalSteps ? setStep(s => s + 1) : handleComplete()}
               disabled={!canProceed || isLoading}
               className="flex-1 gap-2"
             >
-              {step === 3 ? (isLoading ? 'Loading...' : 'Get Started') : 'Continue'}
+              {step === totalSteps ? (isLoading ? 'Loading...' : 'Get Started') : 'Continue'}
               <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
 
-          {step < 3 && (
+          {step < totalSteps && (
             <button 
               onClick={() => setStep(s => s + 1)}
               className="w-full text-center text-sm text-muted-foreground hover:text-foreground mt-3 transition-colors"
