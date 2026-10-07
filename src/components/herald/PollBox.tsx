@@ -36,7 +36,7 @@ export function PollBox({ postId }: PollBoxProps) {
       .maybeSingle();
 
     if (!pollData) return;
-    setPoll({ id: pollData.id, question: pollData.question, options: pollData.options || [] });
+    setPoll({ id: pollData.id, question: pollData.question, options: (pollData.options as string[]) || [] });
 
     const { data: voteData } = await supabase
       .from('poll_votes')
