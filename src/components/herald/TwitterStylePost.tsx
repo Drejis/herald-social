@@ -18,6 +18,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { CommentsSection } from './CommentsSection';
+import { PollBox } from './PollBox';
+import { ReportDialog } from './ReportDialog';
 
 interface Author {
   id: string;
@@ -81,6 +83,7 @@ export function TwitterStylePost({
   const [repostCount, setRepostCount] = useState(reposts);
   const [showComments, setShowComments] = useState(false);
   const [commentCount, setCommentCount] = useState(comments);
+  const [reportOpen, setReportOpen] = useState(false);
 
   const handleLike = () => {
     setIsLiked(!isLiked);
@@ -149,13 +152,30 @@ export function TwitterStylePost({
                 <DropdownMenuItem>Not interested</DropdownMenuItem>
                 <DropdownMenuItem>Follow @{author.username}</DropdownMenuItem>
                 <DropdownMenuItem>Mute @{author.username}</DropdownMenuItem>
-                <DropdownMenuItem className="text-destructive">Report</DropdownMenuItem>
+                <DropdownMenuItem className="text-destructive" onClick={() => setReportOpen(true)}>Report</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
 
-          {/* Post content */}
-          <p className="text-foreground mt-0.5 whitespace-pre-wrap">{content}</p>
+          {/* Post content with hashtags */}
+          <p className="text-foreground mt-0.5 whitespace-pre-wrap">
+            {content.split(/(#[\w]+)/g).map((part, i) =>
+              part.startsWith('#') ? (
+                <Link
+                  key={i}
+                  to={`/hashtag/${part.slice(1).toLowerCase()}`}
+                  className="text-primary hover:underline"
+                >
+                  {part}
+                </Link>
+              ) : (
+                part
+              )
+            )}
+          </p>
+
+          {/* Poll */}
+          <PollBox postId={id} />
 
           {/* Media */}
           {mediaUrl && (
@@ -246,6 +266,14 @@ export function TwitterStylePost({
           )}
         </div>
       </div>
+
+      {/* Report dialog */}
+      <ReportDialog
+        open={reportOpen}
+        onClose={() => setReportOpen(false)}
+        postId={id.startsWith('d') ? undefined : id}
+        reportedUserId={author.id}
+      />
     </article>
   );
 }
