@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -34,7 +34,7 @@ export function CheckoutDialog({ isOpen, onClose, items, onSuccess }: CheckoutDi
   const espeesTotal = items.filter(i => i.priceType === 'espees').reduce((sum, i) => sum + i.price, 0);
 
   // Fetch wallet on open
-  useState(() => {
+  useEffect(() => {
     if (isOpen && user) {
       supabase
         .from('wallets')
@@ -45,7 +45,7 @@ export function CheckoutDialog({ isOpen, onClose, items, onSuccess }: CheckoutDi
           if (data) setWalletBalance({ httn_points: data.httn_points, espees: Number(data.espees) });
         });
     }
-  });
+  }, [isOpen, user]);
 
   const hasEnoughFunds = walletBalance.httn_points >= httnTotal && walletBalance.espees >= espeesTotal;
 
@@ -89,6 +89,15 @@ export function CheckoutDialog({ isOpen, onClose, items, onSuccess }: CheckoutDi
           type: 'purchase',
           amount: -httnTotal,
           token_type: 'points',
+          description: `E-Store purchase: ${items.length} item(s)`,
+        });
+      }
+      if (espeesTotal > 0) {
+        await supabase.from('wallet_transactions').insert({
+          user_id: user.id,
+          type: 'purchase',
+          amount: -espeesTotal,
+          token_type: 'espees',
           description: `E-Store purchase: ${items.length} item(s)`,
         });
       }

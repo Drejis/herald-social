@@ -28,6 +28,7 @@ import Live from "./pages/Live";
 import Communities from "./pages/Communities";
 import Causes from "./pages/Causes";
 import News from "./pages/News";
+import Hashtag from "./pages/Hashtag";
 
 const queryClient = new QueryClient();
 
@@ -147,6 +148,7 @@ const AppRoutes = () => {
       <Route path="/communities" element={<ProtectedRoute><Communities /></ProtectedRoute>} />
       <Route path="/causes" element={<ProtectedRoute><Causes /></ProtectedRoute>} />
       <Route path="/news" element={<ProtectedRoute><News /></ProtectedRoute>} />
+      <Route path="/hashtag/:tag" element={<ProtectedRoute><Hashtag /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
