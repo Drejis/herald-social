@@ -87,7 +87,13 @@ export default function Hashtag() {
           <TwitterStylePost
             key={post.id}
             id={post.id}
-            author={post.author}
+            author={{
+              id: post.author_id || post.author.username,
+              displayName: post.author.display_name,
+              username: post.author.username,
+              avatar: post.author.avatar_url,
+              isVerified: post.author.is_verified,
+            }}
             content={post.content}
             mediaUrl={post.media_url || undefined}
             mediaType={post.media_type === 'image' ? 'image' : post.media_type === 'video' ? 'video' : undefined}
