@@ -6,6 +6,8 @@ import { TasksPanel } from '@/components/herald/TasksPanel';
 import { CreatePostDialog } from '@/components/herald/CreatePostDialog';
 import { SchedulePostDialog } from '@/components/herald/SchedulePostDialog';
 import { FloatingMessageButton } from '@/components/herald/FloatingMessageButton';
+import { StoryBar } from '@/components/herald/StoryBar';
+import { ReferralCard } from '@/components/herald/ReferralCard';
 import { TrendingSection } from '@/components/herald/TrendingSection';
 import { RightSidebarWithAds } from '@/components/herald/RightSidebarWithAds';
 import { VerticalAdBanner, verticalAds } from '@/components/herald/VerticalAdBanner';
@@ -371,6 +373,7 @@ export default function Feed() {
   const rightSidebar = (
     <RightSidebarWithAds>
       <WalletPreview balance={walletBalance} />
+      <ReferralCard />
       <LiveSection compact />
       <NewsSection compact />
       <TrendingSection />
@@ -421,6 +424,9 @@ export default function Feed() {
           <SearchBar />
         </div>
       </header>
+
+      {/* Stories */}
+      <StoryBar />
 
       {/* Compose Box */}
       <div className="border-b border-border p-4">

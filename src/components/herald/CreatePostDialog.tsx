@@ -3,7 +3,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Image, Video, Film, Send, Sparkles } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Image, Video, Film, Send, Sparkles, BarChart2, X, Plus } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -22,20 +23,35 @@ export function CreatePostDialog({ open, onOpenChange, onPostCreated }: CreatePo
   const [mediaType, setMediaType] = useState<string | null>(null);
   const [mediaUrl, setMediaUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showPoll, setShowPoll] = useState(false);
+  const [pollQuestion, setPollQuestion] = useState('');
+  const [pollOptions, setPollOptions] = useState<string[]>(['', '']);
 
   const handleSubmit = async () => {
     if (!user || !content.trim()) return;
 
     setLoading(true);
     try {
-      const { error } = await supabase.from('posts').insert({
+      const { data: postData, error } = await supabase.from('posts').insert({
         author_id: user.id,
         content: content.trim(),
         media_type: mediaType,
         media_url: mediaUrl,
-      });
+      }).select('id').single();
 
       if (error) throw error;
+
+      // Create attached poll
+      const validOptions = pollOptions.map(o => o.trim()).filter(Boolean);
+      if (showPoll && pollQuestion.trim() && validOptions.length >= 2 && postData) {
+        const { error: pollError } = await supabase.from('polls').insert({
+          post_id: postData.id,
+          user_id: user.id,
+          question: pollQuestion.trim(),
+          options: validOptions,
+        });
+        if (pollError) throw pollError;
+      }
 
       toast({
         title: 'Post created!',
@@ -57,6 +73,9 @@ export function CreatePostDialog({ open, onOpenChange, onPostCreated }: CreatePo
 
       setContent('');
       setMediaType(null);
+      setShowPoll(false);
+      setPollQuestion('');
+      setPollOptions(['', '']);
       setMediaUrl(null);
       onOpenChange(false);
       onPostCreated();
@@ -123,6 +142,55 @@ export function CreatePostDialog({ open, onOpenChange, onPostCreated }: CreatePo
               onMediaRemoved={handleMediaRemoved}
               currentMediaUrl={mediaUrl || undefined}
             />
+          )}
+
+          {/* Poll creator */}
+          <button
+            type="button"
+            onClick={() => setShowPoll(!showPoll)}
+            className={`flex items-center gap-2 text-sm px-3 py-2 rounded-full border transition-colors ${
+              showPoll
+                ? 'border-primary text-primary bg-primary/10'
+                : 'border-border text-muted-foreground hover:border-primary/50'
+            }`}
+          >
+            <BarChart2 className="w-4 h-4" />
+            {showPoll ? 'Remove poll' : 'Add poll'}
+          </button>
+
+          {showPoll && (
+            <div className="space-y-2 p-3 rounded-lg border border-border">
+              <Input
+                placeholder="Poll question"
+                value={pollQuestion}
+                onChange={(e) => setPollQuestion(e.target.value)}
+                className="bg-input border-border"
+              />
+              {pollOptions.map((opt, i) => (
+                <div key={i} className="flex gap-2">
+                  <Input
+                    placeholder={`Option ${i + 1}`}
+                    value={opt}
+                    onChange={(e) => setPollOptions(prev => prev.map((o, idx) => idx === i ? e.target.value : o))}
+                    className="bg-input border-border"
+                  />
+                  {pollOptions.length > 2 && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setPollOptions(prev => prev.filter((_, idx) => idx !== i))}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+              ))}
+              {pollOptions.length < 4 && (
+                <Button variant="outline" size="sm" onClick={() => setPollOptions(prev => [...prev, ''])}>
+                  <Plus className="w-4 h-4 mr-1" /> Add option
+                </Button>
+              )}
+            </div>
           )}
 
           <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
