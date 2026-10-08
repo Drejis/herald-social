@@ -11,17 +11,12 @@ export function FloatingMessageButton() {
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
-    if (user) {
-      fetchUnreadCount();
-      subscribeToMessages();
-    }
-  }, [user]);
-
-  const subscribeToMessages = () => {
     if (!user) return;
 
+    fetchUnreadCount();
+
     const channel = supabase
-      .channel('unread-messages')
+      .channel(`unread-messages-${user.id}`)
       .on(
         'postgres_changes',
         {
@@ -39,7 +34,7 @@ export function FloatingMessageButton() {
     return () => {
       supabase.removeChannel(channel);
     };
-  };
+  }, [user]);
 
   const fetchUnreadCount = async () => {
     if (!user) return;

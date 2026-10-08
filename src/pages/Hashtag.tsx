@@ -18,6 +18,7 @@ interface Profile {
 
 interface Post {
   id: string;
+  author_id: string;
   content: string;
   media_url: string | null;
   media_type: string | null;
